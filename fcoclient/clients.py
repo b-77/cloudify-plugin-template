@@ -71,6 +71,8 @@ def _rest_client_retry_and_auth(f):
             self.logger.debug('URL: {}'.format(r.url))
             if len(r.content) > 60:
                 self.logger.info('Content: {}'.format(r.content[:57] + '...'))
+                # self.logger.debug('Full content: {}'.format(r.content))
+                self.logger.info('Full content: {}'.format(r.content))
             else:
                 self.logger.info('Content: {}'.format(r.content))
             self.logger.info('Status code: {}'.format(r.status_code))
