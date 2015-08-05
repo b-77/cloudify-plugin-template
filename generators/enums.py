@@ -9,7 +9,7 @@ def gen_single(enum_name, enum, out=[]):
     """Generate single enum definition."""
     line(out, 'class {}(Enum):', enum_name)
     line(out)
-    line(out, '    """FCO REST API {} enum', enum_name)
+    line(out, '    """FCO REST API {} enum.', enum_name)
     line(out)
 
     # Format docstring to include a full stop

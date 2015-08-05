@@ -290,7 +290,6 @@ class Typed(object):
         return self._data
 
 
-
 def factory(cls, mapping=None, name=None, **kwargs):
     types = cls.types_keys()
 

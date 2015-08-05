@@ -25,6 +25,7 @@ class REST(object):
         # back to wrapper for clarity?
         class Endpoint(object):
             def __call__(eself, *args, **kwargs):
+                self.logger.debug('API endpoint {} requested'.format(item))
                 return self.query(item, *args, **kwargs)
 
         return Endpoint()
