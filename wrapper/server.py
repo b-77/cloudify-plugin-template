@@ -42,7 +42,7 @@ RPROP_NICS = 'nics'
 
 def ssh_probe(server_ip, server_port=22, time=10, step=90):
     while step:
-        print('SSH probing [{}]'.format(90-step))
+        ctx.logger.info('SSH probing [{}]'.format(step))
         try:
             s = socket.create_connection((server_ip, server_port), time)
             s.close()
@@ -173,7 +173,7 @@ def create(fco_api, *args, **kwargs):
     server_ip = server.nics[0].ipAddresses[0].ipAddress
     server_port = 22
 
-    if not ssh_probe(server_ip, server_port):
+    if not ssh_probe(server_ip, server_port, step=-1):
         raise Exception('Starting server failed to complete in time!')
 
     ctx.logger.info('Server READY')
