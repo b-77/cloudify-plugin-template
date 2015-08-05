@@ -19,13 +19,13 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: openstack.nova_plugin.server.create
+          implementation: fcoclient.server.create
         start:
-          implementation: openstack.nova_plugin.server.start
+          implementation: fcoclient.server.start
         stop:
-          implementation: openstack.nova_plugin.server.stop
+          implementation: fcoclient.server.stop
         delete:
-          implementation: openstack.nova_plugin.server.delete
+          implementation: fcoclient.server.delete
       cloudify.interfaces.validation:
         creation:
-          implementation: openstack.nova_plugin.server.creation_validation
+          implementation: fcoclient.server.creation_validation
