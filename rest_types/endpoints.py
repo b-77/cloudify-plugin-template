@@ -13,6 +13,8 @@ from typed.builtins import (List, Dict)
 from enum import Enum
 from datetime import datetime
 
+from cloudify import ctx
+
 Verbs = Enum('Verbs', 'GET POST PUT DELETE')
 
 
@@ -48,6 +50,8 @@ class Endpoint(Typed):
         if not self.is_acceptable(merged):
             raise Exception('Invalid data to create class {}'
                             .format(type(self).__name__))
+
+        ctx.logger.info(parameters)
 
         self.parameters = {}
         for k, v in parameters:
