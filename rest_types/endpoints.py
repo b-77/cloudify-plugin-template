@@ -53,7 +53,8 @@ class Endpoint(Typed):
 
         self.parameters = {}
         for k, v in parameters.items():
-            self.parameters[k] = c_construct_data(v, self.PARAMS_TYPES,
+            self.parameters[k] = c_construct_data(v,
+                                                  self.PARAMS_TYPES[k],
                                                   self._noneable)
         self._data = {}
         for k, v in data.items():
