@@ -51,14 +51,12 @@ class Endpoint(Typed):
             raise Exception('Invalid data to create class {}'
                             .format(type(self).__name__))
 
-        ctx.logger.info(parameters)
-
         self.parameters = {}
-        for k, v in parameters:
+        for k, v in parameters.items():
             self.parameters[k] = c_construct_data(v, self.PARAMS_TYPES,
                                                   self._noneable)
         self._data = {}
-        for k, v in data:
+        for k, v in data.items():
             self._data[k] = c_construct_data(v, self.DATA_TYPES[k],
                                              self._noneable)
         self.endpoint = self.get_endpoint(parameters, data)
