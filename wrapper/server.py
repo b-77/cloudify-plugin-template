@@ -1,24 +1,24 @@
 from __future__ import print_function
 from fcoclient import clients
 from fcoclient import api
-from wrapper.wrapper import (get_image,
-                             get_first_vdc,
-                             create_vdc,
-                             get_prod_offer,
-                             create_server,
-                             create_ssh_key,
-                             attach_ssh_key,
-                             wait_for_state,
-                             wait_for_status,
-                             create_nic,
-                             get_network_uuid,
-                             create_network,
-                             attach_nic,
-                             get_resource,
-                             get_server_state,
-                             start_server,
-                             stop_server,
-                             delete_resource)
+from wrapper import (get_image,
+                     get_first_vdc,
+                     create_vdc,
+                     get_prod_offer,
+                     create_server,
+                     create_ssh_key,
+                     attach_ssh_key,
+                     wait_for_state,
+                     wait_for_status,
+                     create_nic,
+                     get_network_uuid,
+                     create_network,
+                     attach_nic,
+                     get_resource,
+                     get_server_state,
+                     start_server,
+                     stop_server,
+                     delete_resource)
 from datetime import datetime
 import socket
 import errno
