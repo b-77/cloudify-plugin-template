@@ -102,10 +102,10 @@ def with_fco_client(f):
 
 
 def with_fco_api(f):
-    """Wrapper to add FCO API client."""
+    """Wrapper to add FCO API abstraction object."""
     @wraps(f)
     def wrapper(*args, **kwargs):
-        _put_client_in_kwargs('fco_api', kwargs)
+        _put_api_in_kwargs('fco_api', kwargs)
 
         try:
             return f(*args, **kwargs)
