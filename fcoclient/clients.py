@@ -114,6 +114,7 @@ def _rest_client_retry_and_auth(f):
                 terminate = True
             elif r.status_code == rsc.forbidden:
                 error = 'Server responded with forbidden; will not retry.'
+                terminate = True
             elif r.status_code == rsc.service_unavailable:
                 error = 'Server responded with service unavailable; waiting ' \
                         'and retrying {} more time(s).'.format(retry_count)

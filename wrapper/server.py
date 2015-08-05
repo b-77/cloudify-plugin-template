@@ -38,7 +38,9 @@ PROP_CLUSTER = 'cluster_uuid'
 RPROP_UUID = 'uuid'
 RPROP_DISKS = 'disks'
 RPROP_NICS = 'nics'
-
+RPROP_IP = 'ip'
+RPROP_USER = 'username'
+RPROP_PASS = 'password'
 
 def ssh_probe(server_ip, server_port=22, time=10, step=90):
     while step:
@@ -181,6 +183,9 @@ def create(fco_api, *args, **kwargs):
     ctx.instance.runtime_properties[RPROP_UUID] = server.resourceUUID
     ctx.instance.runtime_properties[RPROP_DISKS] = [d.resourceUUID for d in server.disks]
     ctx.instance.runtime_properties[RPROP_NICS] = [n.resourceUUID for n in server.nics]
+    ctx.instance.runtime_properties[RPROP_IP] = server_ip
+    ctx.instance.runtime_properties[RPROP_USER] = server.initialUser
+    ctx.instance.runtime_properties[RPROP_PASS] = server.initialPassword
 
     ctx.logger.info('Server IP: ' + server_ip)
     ctx.logger.info('Server User: ' + server.initialUser)
@@ -210,16 +215,18 @@ def delete(fco_api, *args, **kwargs):
 @with_fco_api
 def start(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
-    if not start_server(fco_api, server_uuid):
-        raise Exception('Could not start server!')
+    if get_server_state(fco_api, server_uuid) != 'RUNNING':
+        if not start_server(fco_api, server_uuid):
+            raise Exception('Could not start server!')
 
 
 @operation
 @with_fco_api
 def stop(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
-    if not stop_server(fco_api, server_uuid):
-        raise Exception('Could not stop server!')
+    if get_server_state(fco_api, server_uuid) != 'STOPPED':
+        if not stop_server(fco_api, server_uuid):
+            raise Exception('Could not stop server!')
 
 
 @operation

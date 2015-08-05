@@ -11,7 +11,7 @@ from typed.builtins import (List, Dict)
 
 from datetime import datetime
 
-from cloudify import ctx
+# from cloudify import ctx
 
 
 class ComplexObject(Typed):
@@ -35,7 +35,7 @@ class ComplexObject(Typed):
 
         # TODO: creating the data structure should make it acceptable
         if not self.is_acceptable(data):
-            ctx.logger.info(data)
+            # ctx.logger.info(data)
             raise Exception('Invalid data to create class {}'
                             .format(type(self).__name__))
 
@@ -59,7 +59,7 @@ class ComplexObject(Typed):
         opt = cls.OPTIONAL_ATTRIBS.copy()
         try:
             for k, v in inst.items():
-                ctx.logger.info(' -> {}: {}, {}'.format(k, v, cls.TYPES[k]))
+                # ctx.logger.info(' -> {}: {}, {}'.format(k, v, cls.TYPES[k]))
                 if k in req:
                     req.remove(k)
                 else:

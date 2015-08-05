@@ -13,7 +13,7 @@ from typed.builtins import (List, Dict)
 from enum import Enum
 from datetime import datetime
 
-from cloudify import ctx
+# from cloudify import ctx
 
 Verbs = Enum('Verbs', 'GET POST PUT DELETE')
 

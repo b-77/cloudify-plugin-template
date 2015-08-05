@@ -6,7 +6,7 @@ from enum import Enum
 from typed import Typed
 from datetime import datetime, timedelta
 
-from cloudify import ctx
+# from cloudify import ctx
 
 __author__ = 'alen'
 
@@ -81,7 +81,7 @@ def is_acceptable(inst, type_, noneable):
         except ValueError:
             return False
     elif not isinstance(inst, type_):
-        ctx.logger.info('{} {} {}'.format(inst, type(inst), type_))
+        # ctx.logger.info('{} {} {}'.format(inst, type(inst), type_))
         return False
     return True
 
