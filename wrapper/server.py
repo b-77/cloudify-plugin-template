@@ -64,6 +64,10 @@ def create(fco_api, **kwargs):
     public_keys = ctx.node.properties.get(PROP_PUBLIC_KEYS, [])
     server_po_name = ctx.node.properties.get(PROP_SERVER_PO_NAME)
 
+    # Get cluster and VDC UUID
+
+    ctx.logger.info('image UUID: ' + image_uuid)
+
     image = get_image(fco_api, image_uuid)
     cluster_uuid = ctx.node.properties.get(PROP_CLUSTER) or image.clusterUUID
     vdc_uuid = get_first_vdc(fco_api, cluster_uuid).resourceUUID
