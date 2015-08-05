@@ -2,7 +2,6 @@
 
 """Provides FCO API Client and decorator."""
 
-from __future__ import print_function
 from functools import wraps
 
 from fcoclient.exceptions import (NonRecoverableError, RecoverableError)
@@ -63,21 +62,21 @@ def _rest_client_retry_and_auth(f):
         while retry_count:
             terminate = False
 
-            self.logger('=' * 60)
+            self.logger.debug('=' * 60)
 
             r = f(self, url, payload, self.auth, self.headers,
                   self.verify)
 
-            self.logger('-' * 60)
-            self.logger('URL: {}'.format(r.url))
+            self.logger.debug('-' * 60)
+            self.logger.debug('URL: {}'.format(r.url))
             if len(r.content) > 60:
-                self.logger('Content: {}'.format(r.content[:57] + '...'))
+                self.logger.info('Content: {}'.format(r.content[:57] + '...'))
             else:
-                self.logger('Content: {}'.format(r.content))
-            self.logger('Status code: {}'.format(r.status_code))
+                self.logger.info('Content: {}'.format(r.content))
+            self.logger.info('Status code: {}'.format(r.status_code))
 
             if r.status_code == rsc.accepted or r.status_code == rsc.ok:
-                self.logger('=' * 60)
+                self.logger.debug('=' * 60)
 
                 # TODO: convert everything to unicode
                 unicode = json.loads(r.content)
@@ -123,10 +122,10 @@ def _rest_client_retry_and_auth(f):
             except:
                 pass
 
-            self.logger(error)
+            self.logger.error(error)
 
             if terminate:
-                self.logger('=' * 60)
+                self.logger.debug('=' * 60)
                 raise NonRecoverableError(error)
             if self.internal_retry:
                 retry_count -= 1
@@ -135,9 +134,9 @@ def _rest_client_retry_and_auth(f):
                 raise RecoverableError(message=error,
                                        retry_after=self.retry_delay)
 
-        self.logger('Giving up on API request (url: {}, payload: {}).'
-                    .format(url, payload))
-        self.logger('=' * 60)
+        self.logger.error('Giving up on API request (url: {}, payload: {}).'
+                          .format(url, payload))
+        self.logger.debug('=' * 60)
 
         REST_FAILURE_EXCEPTION('Giving up on API request (url: {}, '
                                'payload: {}).'.format(url, payload))
@@ -155,7 +154,7 @@ class APIClient(object):
 
     def __init__(self, auth, retry_count=REST_RETRY_COUNT,
                  retry_delay=REST_RETRY_DELAY, rest_headers=REST_HEADERS,
-                 logger=print, internal_retry=REST_INTERNAL_RETRY):
+                 logger=None, internal_retry=REST_INTERNAL_RETRY):
         """Initialise FCO API Client."""
         self.retry_count = retry_count
         self.retry_delay = retry_delay
@@ -186,36 +185,36 @@ class RESTClient(APIClient):
     @_rest_client_retry_and_auth
     def post(self, url, data, auth, headers, verify):
         """Make POST request to FCO API."""
-        self.logger('METHOD: POST')
-        self.logger('URL: {}'.format(url))
-        self.logger('DATA: {}'.format(data))
+        self.logger.info('METHOD: POST')
+        self.logger.info('URL: {}'.format(url))
+        self.logger.info('DATA: {}'.format(data))
         return requests.post(url, data, auth=auth, headers=headers,
                              verify=verify)
 
     @_rest_client_retry_and_auth
     def get(self, url, data, auth, headers, verify):
         """Make GET request to FCO API."""
-        self.logger('METHOD: GET')
-        self.logger('URL: {}'.format(url))
-        self.logger('DATA: {}'.format(data))
+        self.logger.info('METHOD: GET')
+        self.logger.info('URL: {}'.format(url))
+        self.logger.info('DATA: {}'.format(data))
         return requests.get(url, params=data, auth=auth, headers=headers,
                             verify=verify)
 
     @_rest_client_retry_and_auth
     def put(self, url, data, auth, headers, verify):
         """Make PUT request to FCO API."""
-        self.logger('METHOD: PUT')
-        self.logger('URL: {}'.format(url))
-        self.logger('DATA: {}'.format(data))
+        self.logger.info('METHOD: PUT')
+        self.logger.info('URL: {}'.format(url))
+        self.logger.info('DATA: {}'.format(data))
         return requests.put(url, data, auth=auth, headers=headers,
                             verify=verify)
 
     @_rest_client_retry_and_auth
     def delete(self, url, data, auth, headers, verify):
         """Make DELETE request to FCO API."""
-        self.logger('METHOD: DELETE')
-        self.logger('URL: {}'.format(url))
-        self.logger('DATA: {}'.format(data))
+        self.logger.info('METHOD: DELETE')
+        self.logger.info('URL: {}'.format(url))
+        self.logger.info('DATA: {}'.format(data))
         return requests.delete(url, params=data, auth=auth, headers=headers,
                                verify=verify)
 
