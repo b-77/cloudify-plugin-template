@@ -22,7 +22,12 @@ class ComplexObject(Typed):
         super(ComplexObject, self).__init__(self)
 
         # We can append underscores to avoid keyword conflicts
-        kwargs = {k.rstrip('_'): v for k, v in kwargs.items()}
+        # kwargs = {k.rstrip('_'): v for k, v in kwargs.items()}
+        for k, v in kwargs.items():
+            k = k.rstrip('_')
+            if isinstance(v, unicode):
+                v = str(v)
+            kwargs[k] = v
 
         if data is None:
             data = {}
