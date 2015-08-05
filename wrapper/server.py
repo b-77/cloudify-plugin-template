@@ -24,6 +24,7 @@ import socket
 import errno
 from cloudify import ctx
 from cloudify.decorators import operation
+from wrapper.common import with_fco_api
 
 PROP_IMAGE = 'image_uuid'
 PROP_NET_TYPE = 'net_type'
@@ -37,13 +38,6 @@ PROP_CLUSTER = 'cluster_uuid'
 RPROP_UUID = 'uuid'
 RPROP_DISKS = 'disks'
 RPROP_NICS = 'nics'
-
-
-def with_fco_api(f):
-    def wrapper(*args, **kwargs):
-        fco_api = api.REST(clients.auth_test, print)
-        return f(fco_api, *args, **kwargs)
-    return wrapper
 
 
 def ssh_probe(server_ip, server_port=22, time=10, step=90):
