@@ -4,7 +4,7 @@
 
 import rest_types.enums as enums
 import rest_types.cobjects as cobjects
-from rest_types import rat_check
+from rest_types import (to_string, rat_check)
 from rest_types import is_acceptable as c_is_acceptable
 from rest_types import construct_data as c_construct_data
 from typed import Typed
@@ -38,12 +38,7 @@ class Endpoint(Typed):
         super(Endpoint, self).__init__(self)
 
         # We can append underscores to avoid keyword conflicts
-        # kwargs = {k.rstrip('_'): v for k, v in kwargs.items()}
-        for k, v in kwargs.items():
-            k = k.rstrip('_')
-            if isinstance(v, unicode):
-                v = str(v)
-            kwargs[k] = v
+        kwargs = {k.rstrip('_'): to_string(v) for k, v in kwargs.items()}
 
         parameters, data = self.prepare_input(parameters, data, **kwargs)
 

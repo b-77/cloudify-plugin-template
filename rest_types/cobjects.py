@@ -3,6 +3,7 @@
 """All the REST Complex Objects used by the FCO REST API."""
 
 import rest_types.enums as enums
+from rest_types import to_string
 from rest_types import is_acceptable as c_is_acceptable
 from rest_types import construct_data as c_construct_data
 from typed import Typed
