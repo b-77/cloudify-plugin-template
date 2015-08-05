@@ -2,17 +2,16 @@
 
 """Provides common utility functions for REST types."""
 
-__author__ = 'alen'
-
-
 from enum import Enum
-from fcoclient.typed import Typed
+from typed import Typed
 from datetime import datetime, timedelta
+
+__author__ = 'alen'
 
 
 def rat_check(given_dict, all_, required, types, noneable,
               fail_additional=True):
-    """Checks for required stuff, additional stuff and types of stuff."""
+    """Check for required stuff, additional stuff and types of stuff."""
     try:
         given = set(given_dict)
     except TypeError:

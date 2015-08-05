@@ -1,14 +1,16 @@
+# coding=UTF-8
+
+"""Provides common utilities."""
+
 from cloudify import context
-from cloudify.exceptions import NonRecoverableError, RecoverableError
+from cloudify.exceptions import (NonRecoverableError, RecoverableError)
 
 from functools import wraps
 
 from fcoclient.clients import (get_client, RESTClient, PROP_CLIENT_CONFIG)
 from fcoclient.api import REST as RESTApi
 import fcoclient.exceptions as fco_exceptions
-import fcoclient.rest.cobjects as cobjects
-
-import re
+import rest_types.cobjects as cobjects
 
 
 def _find_instanceof_in_kwargs(cls, kw):
@@ -35,7 +37,8 @@ def _get_ctx(kwargs):
 
 def _put_client_in_kwargs(client_name, kwargs):
     """Consolidate authentication information and insert client into kwargs."""
-    if client_name in kwargs and not isinstance(kwargs[client_name], RESTClient):
+    if client_name in kwargs and not isinstance(kwargs[client_name],
+                                                RESTClient):
         raise NonRecoverableError('Incorrect client class exists.')
 
     ctx = _get_ctx(kwargs)
@@ -124,12 +127,6 @@ def cfy_id(ctx, type_):
         type_ = type_.__name__
 
     return "{0}_{1}_{2}".format(type_, ctx.deployment.id, ctx.instance.id)
-
-
-def cc2u(name):
-    """From camelcase to underscored: http://stackoverflow.com/a/1176023."""
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 def co_from_properties(co, properties):

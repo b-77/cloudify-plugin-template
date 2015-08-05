@@ -5,6 +5,7 @@
 from enum import Enum
 
 
+# TODO: add period to first line of docstring in generator
 class PrintableEnum(Enum):
 
     """Allows for easier formatting when substituting for parameters."""

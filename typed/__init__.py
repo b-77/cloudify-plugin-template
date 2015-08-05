@@ -2,13 +2,12 @@
 
 """Provides utilities for simulating strongly-typed objects."""
 
+from enum import Enum
+
 __author__ = 'alen'
 
 
-from enum import Enum
-
-
-# TODO: shift from mapping to kwargs everywhere
+# TODO: completely shift from mapping to kwargs everywhere
 
 
 class type_check(object):
@@ -55,7 +54,6 @@ class _NoneType(object):
 
 
 _None = _NoneType()
-
 
 
 class MetaTyped(type):

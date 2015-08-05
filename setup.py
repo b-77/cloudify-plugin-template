@@ -29,7 +29,7 @@ setup(
     description='Something',
 
     # This must correspond to the actual packages in the plugin.
-    packages=['fcoclient'],
+    packages=['fcoclient', 'rest_types', 'typed', 'wrapper'],
 
     license='LICENSE',
     zip_safe=False,

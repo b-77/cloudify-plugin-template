@@ -5,13 +5,12 @@
 from __future__ import print_function
 from functools import wraps
 
-from exceptions import NonRecoverableError, RecoverableError
+from fcoclient.exceptions import (NonRecoverableError, RecoverableError)
 
 import requests
-from requests import codes as rsc
 import json
+from requests import codes as rsc
 from time import sleep
-import logging
 
 
 # REST Client default settings
@@ -38,16 +37,6 @@ PROP_CLIENT_CA_CERT = 'ca_cert'
 # Configurable kwargs keys for client
 KW_PAYLOAD = 'payload'
 KW_PATTERN = 'pattern'
-
-
-# TODO: remove
-auth_test = {
-    PROP_CLIENT_API_USERNAME: '4d194318-778b-3059-85e6-5e4d33a03a9b',
-    PROP_CLIENT_API_PASSWORD: 'api-test',
-    PROP_CLIENT_CUSTOMER: 'e50bfd1b-253a-3290-85ff-95e218398b7e',
-    PROP_CLIENT_SERVICE_URL: 'https://cp.diceproject.flexiant.net',
-    PROP_CLIENT_CA_CERT: False
-}
 
 
 def _rest_client_retry_and_auth(f):

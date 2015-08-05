@@ -1,5 +1,5 @@
 from __future__ import print_function
-from fcoclient.rest import cobjects
+from rest_types import cobjects
 from time import sleep
 
 

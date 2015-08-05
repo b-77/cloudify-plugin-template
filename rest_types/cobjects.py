@@ -2,12 +2,13 @@
 
 """All the REST Complex Objects used by the FCO REST API."""
 
-import fcoclient.rest.enums as enums
-from fcoclient.typed import Typed
-from fcoclient.typed.builtins import (List, Dict)
+import rest_types.enums as enums
+from rest_types import is_acceptable as c_is_acceptable
+from rest_types import construct_data as c_construct_data
+from typed import Typed
+from typed.builtins import (List, Dict)
+
 from datetime import datetime
-from . import is_acceptable as c_is_acceptable
-from . import construct_data as c_construct_data
 
 
 class ComplexObject(Typed):
@@ -32,7 +33,7 @@ class ComplexObject(Typed):
         # TODO: creating the data structure should make it acceptable
         if not self.is_acceptable(data):
             raise Exception('Invalid data to create class {}'
-                .format(type(self).__name__))
+                            .format(type(self).__name__))
 
         self._data = self.construct_data(data)
 

@@ -19,13 +19,13 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: flexiant.fcoclient.server.create
+          implementation: flexiant.wrapper.server.create
         start:
-          implementation: flexiant.fcoclient.server.start
+          implementation: flexiant.wrapper.server.start
         stop:
-          implementation: flexiant.fcoclient.server.stop
+          implementation: flexiant.wrapper.server.stop
         delete:
-          implementation: flexiant.fcoclient.server.delete
+          implementation: flexiant.wrapper.server.delete
       cloudify.interfaces.validation:
         creation:
-          implementation: flexiant.fcoclient.server.creation_validation
+          implementation: flexiant.wrapper.server.creation_validation

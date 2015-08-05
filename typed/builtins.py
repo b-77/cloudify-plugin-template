@@ -2,7 +2,7 @@
 
 """Provides two basic builtin alternatives: List and Dict."""
 
-from . import (factory, Array, Map)
+from typed import (factory, Array, Map)
 
 
 def List(item_type):

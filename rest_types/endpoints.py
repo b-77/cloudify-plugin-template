@@ -2,16 +2,16 @@
 
 """Provides abstraction of the FCO REST API endpoints."""
 
-from enum import Enum
-import fcoclient.rest.enums as enums
-import fcoclient.rest.cobjects as cobjects
-from datetime import datetime
+import rest_types.enums as enums
+import rest_types.cobjects as cobjects
+from rest_types import rat_check
+from rest_types import is_acceptable as c_is_acceptable
+from rest_types import construct_data as c_construct_data
 from fcoclient.typed import Typed
 from fcoclient.typed.builtins import (List, Dict)
-from . import rat_check
-from . import is_acceptable as c_is_acceptable
-from . import construct_data as c_construct_data
 
+from enum import Enum
+from datetime import datetime
 
 Verbs = Enum('Verbs', 'GET POST PUT DELETE')
 
@@ -42,7 +42,6 @@ class Endpoint(Typed):
 
         parameters, data = self.prepare_input(parameters, data, **kwargs)
 
-
         merged = parameters.copy()
         merged.update(data)
 
@@ -66,7 +65,8 @@ class Endpoint(Typed):
             parameters = {}
         if data is None:
             data = {}
-        parameters.update({k: v for k, v in kwargs.items() if k in cls.ALL_PARAMS})
+        parameters.update({k: v for k, v in kwargs.items() if k in
+                           cls.ALL_PARAMS})
         data.update({k: v for k, v in kwargs.items() if k in cls.ALL_DATA})
 
         for param in cls.ALL_PARAMS:
@@ -151,7 +151,8 @@ class Endpoint(Typed):
         return not req or cls._noneable
 
     def __str__(self):
-        return str(self.endpoint[0]) + ' ' + self.endpoint[1] + ': ' + str(self._data)
+        return str(self.endpoint[0]) + ' ' + self.endpoint[1] + ': ' + \
+                str(self._data)
 
 
 class UpdateUser(Endpoint):

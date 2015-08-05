@@ -1,11 +1,13 @@
-"""Abstraction of FCO API."""
+# coding=UTF-8
 
-import fcoclient.rest.enums as enums
-import fcoclient.rest.cobjects as cobjects
-import fcoclient.rest.endpoints as endpoints
+"""Abstraction of FCO API in the form of a Python wrapper."""
+
 import fcoclient.clients as clients
-import json
+import rest_types.enums as enums
+import rest_types.cobjects as cobjects
+import rest_types.endpoints as endpoints
 
+import json
 import inspect
 
 
@@ -27,17 +29,11 @@ class REST(object):
 
         return Endpoint()
 
-    def query(self, endpoint, parameters=None, data=None, validate=False, **kwargs):
+    def query(self, endpoint, parameters=None, data=None, validate=False,
+              **kwargs):
         endpoint = endpoint[0].capitalize() + endpoint[1:]
-        # TODO: more precise check of exception
-        # try:
-            # TODO: use instantiated endpoint for ease?
-            # endpoint = getattr(endpoints, endpoint)
+        # TODO: exception handling
         endpoint = getattr(endpoints, endpoint)(parameters, data, **kwargs)
-        # print endpoint
-        # except:
-        #    raise AttributeError('API does not support requested endpoint')
-        # type, url = endpoint.get_endpoint(parameters, data)
         type, url = endpoint.endpoint
         if type is endpoints.Verbs.PUT:
             fn = self.client.put
@@ -57,14 +53,7 @@ class REST(object):
         else:
             payload = json.JSONEncoder().encode(payload)
 
-        # print('ayy lmao api: ' + str(payload))
-
-        # print('api call ' + str(fn))
-        # print('api payload ' + str(payload))
-
         rv = fn(url, payload)
-
-        # print('api result: ' + str(rv))
 
         if validate:
             return rv, endpoint.validate_return(rv)
