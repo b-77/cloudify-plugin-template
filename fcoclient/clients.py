@@ -284,7 +284,7 @@ def get_client(auth, logger):
     """Get an instance of the appropriate API Client."""
     for cls in UserPassRESTClient, APIUserPassRESTClient, APITokenRESTClient:
         if cls.can_handle(auth):
-            logger('Using client: {}'.format(cls.__name__))
+            logger.info('Using client: {}'.format(cls.__name__))
             return cls(auth, logger=logger)
     raise NonRecoverableError('Failed to determine FCO Client class based on '
                               'the following authentication arguments: {}'
