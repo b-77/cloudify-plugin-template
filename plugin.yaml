@@ -1,7 +1,7 @@
 plugins:
   flexiant:
     executor: central_deployment_agent
-    source: https://github.com/b-77/cloudify-plugin-template/archive/3.2.zip
+    source: https://github.com/b-77/cloudify-plugin-template/archive/3.2-build.zip
 
 node_types:
   cloudify.flexiant.nodes.Server:
