@@ -7,8 +7,8 @@ import rest_types.cobjects as cobjects
 from rest_types import rat_check
 from rest_types import is_acceptable as c_is_acceptable
 from rest_types import construct_data as c_construct_data
-from fcoclient.typed import Typed
-from fcoclient.typed.builtins import (List, Dict)
+from typed import Typed
+from typed.builtins import (List, Dict)
 
 from enum import Enum
 from datetime import datetime
