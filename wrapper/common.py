@@ -57,7 +57,7 @@ def _put_client_in_kwargs(client_name, kwargs):
         except AttributeError:
             auth = kwargs[PROP_CLIENT_CONFIG]
 
-    kwargs[client_name] = get_client(auth, logger=ctx.logger)
+    kwargs[client_name] = get_client(auth, logger=ctx.logger.info)
 
 
 def _put_api_in_kwargs(api_name, kwargs):
