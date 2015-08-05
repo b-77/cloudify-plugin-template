@@ -56,7 +56,9 @@ def ssh_probe(server_ip, server_port=22, time=10, step=90):
 
 @operation
 @with_fco_api
-def create(fco_api, **kwargs):
+def create(fco_api, *args, **kwargs):
+    ctx.logger.info('starting server creation')
+
     image_uuid = ctx.node.properties.get(PROP_IMAGE)
     net_type = ctx.node.properties.get(PROP_NET_TYPE, 'IP')
     cpu_count = ctx.node.properties.get(PROP_CPU_COUNT)
@@ -189,7 +191,7 @@ def create(fco_api, **kwargs):
 
 @operation
 @with_fco_api
-def delete(fco_api, **kwargs):
+def delete(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
     for d in ctx.instance.runtime_properties[RPROP_DISKS]:
         job_uuid = delete_resource(fco_api, d, 'DISK').resourceUUID
@@ -206,7 +208,7 @@ def delete(fco_api, **kwargs):
 
 @operation
 @with_fco_api
-def start(fco_api, **kwargs):
+def start(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
     if not start_server(fco_api, server_uuid):
         raise Exception('Could not start server!')
@@ -214,7 +216,7 @@ def start(fco_api, **kwargs):
 
 @operation
 @with_fco_api
-def stop(fco_api, **kwargs):
+def stop(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
     if not stop_server(fco_api, server_uuid):
         raise Exception('Could not stop server!')
@@ -222,7 +224,7 @@ def stop(fco_api, **kwargs):
 
 @operation
 @with_fco_api
-def creation_validation(fco_api, **kwargs):
+def creation_validation(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
     try:
         get_resource(fco_api, server_uuid, 'SERVER')

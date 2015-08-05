@@ -107,6 +107,7 @@ def with_fco_api(f):
     def wrapper(*args, **kwargs):
         _put_api_in_kwargs('fco_api', kwargs)
 
+        return f(*args, **kwargs)
         try:
             return f(*args, **kwargs)
         except fco_exceptions.NonRecoverableError as e:
