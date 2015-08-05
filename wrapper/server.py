@@ -139,11 +139,11 @@ def create(fco_api, **kwargs):
         if not stop_server(fco_api, server_uuid):
             raise Exception('Stopping server failed to complete in time!')
 
-     ctx.logger.info('Server STOPPED')
+    ctx.logger.info('Server STOPPED')
 
     # Attach NIC
     attach_nic_job = attach_nic(fco_api, server_uuid, nic_uuid, 1)
-    if not wait_for_status(fco_api, attach_nic_job.resourceUUID, 'SUCCESSFUL', 'JOB'):
+    if not wait_for_status(fco_api, attach_nic_job.resourceUUID, 'SUCCESSFUL','JOB'):
         raise Exception('Attaching NIC failed to complete in time!')
 
     server = get_resource(fco_api, server_uuid, 'SERVER')
