@@ -67,6 +67,7 @@ def create(fco_api, **kwargs):
     # Get cluster and VDC UUID
 
     ctx.logger.info('image UUID: ' + image_uuid)
+    ctx.logger.info('fco_api: ' + str(fco_api))
 
     image = get_image(fco_api, image_uuid)
     cluster_uuid = ctx.node.properties.get(PROP_CLUSTER) or image.clusterUUID
