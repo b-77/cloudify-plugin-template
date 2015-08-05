@@ -1,13 +1,31 @@
 plugins:
-  # Name could be anything, this name is what appears on the beginning of operation
-  # mappings.
-  plugin_name:
-    # Could be 'central_deployment_agent' or 'host_agent'.
-    # If 'central_deployment_agent', this plugin will be executed on the
-    # deployment dedicated agent, other wise it will be executed on the host agent.
-    executor: host_agent
+  flexiant:
+    executor: central_deployment_agent
+    source: https://github.com/b-77/cloudify-plugin-template/archive/3.2.zip
 
-    # URL to archive containing the plugin or name of directory containing
-    # the plugin if it is included in the the blueprint directory under the
-    # "plugins" directory.
-    source: https://github.com/cloudify-cosmo/cloudify-plugin-template/archive/3.2.zip
+node_types:
+  cloudify.flexiant.nodes.Server:
+    derived_from: cloudify.nodes.Compute
+    properties:
+      image_uuid: {}
+      net_type:
+        default: 'IP'
+      cpu_count:
+        default: 2
+      ram_amount:
+        default: 2048
+      server_type:
+        default: '2 GB / 2 CPU'
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: openstack.nova_plugin.server.create
+        start:
+          implementation: openstack.nova_plugin.server.start
+        stop:
+          implementation: openstack.nova_plugin.server.stop
+        delete:
+          implementation: openstack.nova_plugin.server.delete
+      cloudify.interfaces.validation:
+        creation:
+          implementation: openstack.nova_plugin.server.creation_validation

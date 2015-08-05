@@ -21,21 +21,22 @@ from setuptools import setup
 setup(
 
     # Do not use underscores in the plugin name.
-    name='ENTER-PLUGIN-NAME-HERE',
+    name='cloudify-flexiant-plugin',
 
     version='0.1',
-    author='ENTER-AUTHOR-HERE',
-    author_email='ENTER-AUTHOR-EMAIL-HERE',
-    description='ENTER-DESCRIPTION-HERE',
+    author='alen',
+    author_email='example@example.com',
+    description='Something',
 
     # This must correspond to the actual packages in the plugin.
-    packages=['plugin'],
+    packages=['fcoclient'],
 
     license='LICENSE',
     zip_safe=False,
     install_requires=[
-        # Necessary dependency for developing plugins, do not remove!
-        "cloudify-plugins-common>=3.2"
+        "cloudify-plugins-common>=3.2",
+        "enum34>=1.0.4",
+        "requests>=2.5.1"
     ],
     test_requires=[
         "cloudify-dsl-parser>=3.2"
