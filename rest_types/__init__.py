@@ -11,21 +11,21 @@ from cloudify import ctx
 __author__ = 'alen'
 
 
-def to_str(unicode):
+def to_str(uni_):
     """Recursively turn unciode to str."""
-    if isinstance(unicode, list):
-        gen = enumerate(unicode)
-        string = [None]*len(unicode)
-    elif isinstance(unicode, dict):
-        gen = unicode.items()
-        string = {}
-    elif isinstance(unicode, basestring):
-        return str(unicode)
+    if isinstance(uni_, list):
+        gen = enumerate(uni_)
+        str_ = [None]*len(uni_)
+    elif isinstance(uni_, dict):
+        gen = uni_.items()
+        str_ = {}
+    elif isinstance(uni_, basestring):
+        return str(uni_)
     else:
-        return unicode
+        return uni_
     for k, v in gen:
-        string[to_str(k)] = to_str(v)
-    return string
+        str_[to_str(k)] = to_str(v)
+    return str_
 
 
 def rat_check(given_dict, all_, required, types, noneable,

@@ -3,7 +3,7 @@
 """All the REST Complex Objects used by the FCO REST API."""
 
 import rest_types.enums as enums
-from rest_types import to_string
+from rest_types import to_str
 from rest_types import is_acceptable as c_is_acceptable
 from rest_types import construct_data as c_construct_data
 from typed import Typed
@@ -23,12 +23,7 @@ class ComplexObject(Typed):
         super(ComplexObject, self).__init__(self)
 
         # We can append underscores to avoid keyword conflicts
-        # kwargs = {k.rstrip('_'): v for k, v in kwargs.items()}
-        for k, v in kwargs.items():
-            k = k.rstrip('_')
-            if isinstance(v, unicode):
-                v = str(v)
-            kwargs[k] = v
+        kwargs = {k.rstrip('_'): to_str(v) for k, v in kwargs.items()}
 
         if data is None:
             data = {}
