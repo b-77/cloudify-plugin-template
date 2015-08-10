@@ -52,10 +52,6 @@ RPROP_USER = 'username'
 RPROP_PASS = 'password'
 
 
-def provision_key(server_ip, server_user, server_password, server_port=22):
-
-
-
 def ssh_probe(server_ip, server_port=22, time=10, step=90):
     while step:
         ctx.logger.info('SSH probing [{}]'.format(step))
@@ -211,7 +207,6 @@ def create(fco_api, *args, **kwargs):
         logger.error('pexpect error: %s', str(e))
     finally:
         call(['sed', '-i', '/{}.*/d'.format('\\.'.join(hostname.split('.')))])
-
 
     ctx.instance.runtime_properties[RPROP_UUID] = server.resourceUUID
     ctx.instance.runtime_properties[RPROP_DISKS] = [d.resourceUUID for d in server.disks]
