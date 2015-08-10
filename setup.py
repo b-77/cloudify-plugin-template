@@ -36,7 +36,8 @@ setup(
     install_requires=[
         "cloudify-plugins-common>=3.2",
         "enum34>=1.0.4",
-        "requests>=2.5.1"
+        "requests>=2.5.1",
+        "pexpect>=3.3"
     ],
     test_requires=[
         "cloudify-dsl-parser>=3.2"

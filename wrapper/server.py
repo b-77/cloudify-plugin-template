@@ -29,6 +29,9 @@ import errno
 from cloudify import ctx
 from cloudify.decorators import operation
 from wrapper.helpers import with_fco_api
+from pexpect import pxssh
+from subprocess import call
+
 
 PROP_IMAGE = 'image_uuid'
 PROP_NET_TYPE = 'net_type'
@@ -47,6 +50,11 @@ RPROP_NICS = 'nics'
 RPROP_IP = 'ip'
 RPROP_USER = 'username'
 RPROP_PASS = 'password'
+
+
+def provision_key(server_ip, server_user, server_password, server_port=22):
+
+
 
 def ssh_probe(server_ip, server_port=22, time=10, step=90):
     while step:
@@ -191,6 +199,19 @@ def create(fco_api, *args, **kwargs):
         raise Exception('Starting server failed to complete in time!')
 
     ctx.logger.info('Server READY')
+
+    # Actually provision key
+    public_key = get_resource(fco_api, key_uuid, 'SSHKEY').publicKey
+    try:
+        s = pxssh.pxssh()
+        s.login(server_ip, server.initialUser, server.initialPassword)
+        s.sendline('echo "{}" >> ~/.ssh/authorized_keys'.format(public_key))
+        s.logout()
+    except pxssh.ExceptionPxssh as e:
+        logger.error('pexpect error: %s', str(e))
+    finally:
+        call(['sed', '-i', '/{}.*/d'.format('\\.'.join(hostname.split('.')))])
+
 
     ctx.instance.runtime_properties[RPROP_UUID] = server.resourceUUID
     ctx.instance.runtime_properties[RPROP_DISKS] = [d.resourceUUID for d in server.disks]
