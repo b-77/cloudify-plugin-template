@@ -5,7 +5,6 @@
 from enum import Enum
 
 
-# TODO: add period to first line of docstring in generator
 class PrintableEnum(Enum):
 
     """Allows for easier formatting when substituting for parameters."""
@@ -19,7 +18,7 @@ class PrintableEnum(Enum):
         return self.value
 
 
-class DeploymentInstanceStatus(Enum):
+class DeploymentInstanceStatus(PrintableEnum):
 
     """FCO REST API DeploymentInstanceStatus enum.
 
@@ -52,7 +51,7 @@ class DeploymentInstanceStatus(Enum):
     DELETING = 'DELETING'
 
 
-class Networking(Enum):
+class Networking(PrintableEnum):
 
     """FCO REST API Networking enum.
 
@@ -67,7 +66,7 @@ class Networking(Enum):
     PVIP = 'PVIP'
 
 
-class HypervisorType(Enum):
+class HypervisorType(PrintableEnum):
 
     """FCO REST API HypervisorType enum.
 
@@ -89,7 +88,7 @@ class HypervisorType(Enum):
     VMWARE = 'VMWARE'
 
 
-class FirewallConnectionState(Enum):
+class FirewallConnectionState(PrintableEnum):
 
     """FCO REST API FirewallConnectionState enum.
 
@@ -106,7 +105,7 @@ class FirewallConnectionState(Enum):
     EXISTING = 'EXISTING'
 
 
-class EmailType(Enum):
+class EmailType(PrintableEnum):
 
     """FCO REST API EmailType enum.
 
@@ -158,7 +157,7 @@ class EmailType(Enum):
     INVOICE = 'INVOICE'
 
 
-class InvoiceStatus(Enum):
+class InvoiceStatus(PrintableEnum):
 
     """FCO REST API InvoiceStatus enum.
 
@@ -182,7 +181,7 @@ class InvoiceStatus(Enum):
     PENDING = 'PENDING'
 
 
-class Publish(Enum):
+class Publish(PrintableEnum):
 
     """FCO REST API Publish enum.
 
@@ -199,7 +198,7 @@ class Publish(Enum):
     VALIDATED_CUSTOMER = 'VALIDATED_CUSTOMER'
 
 
-class BillingPeriod(Enum):
+class BillingPeriod(PrintableEnum):
 
     """FCO REST API BillingPeriod enum.
 
@@ -222,7 +221,7 @@ class BillingPeriod(Enum):
     WEEKLY = 'WEEKLY'
 
 
-class ResourceState(Enum):
+class ResourceState(PrintableEnum):
 
     """FCO REST API ResourceState enum.
 
@@ -244,7 +243,7 @@ class ResourceState(Enum):
     HIDDEN = 'HIDDEN'
 
 
-class UserType(Enum):
+class UserType(PrintableEnum):
 
     """FCO REST API UserType enum.
 
@@ -260,7 +259,7 @@ class UserType(Enum):
     API_KEY_USER = 'API_KEY_USER'
 
 
-class PdfPageSize(Enum):
+class PdfPageSize(PrintableEnum):
 
     """FCO REST API PdfPageSize enum.
 
@@ -274,7 +273,7 @@ class PdfPageSize(Enum):
     LETTER = 'LETTER'
 
 
-class FirewallProtocol(Enum):
+class FirewallProtocol(PrintableEnum):
 
     """FCO REST API FirewallProtocol enum.
 
@@ -303,7 +302,7 @@ class FirewallProtocol(Enum):
     ANY = 'ANY'
 
 
-class Email(Enum):
+class Email(PrintableEnum):
 
     """FCO REST API Email enum.
 
@@ -318,7 +317,7 @@ class Email(Enum):
     NO = 'NO'
 
 
-class Status(Enum):
+class Status(PrintableEnum):
 
     """FCO REST API Status enum.
 
@@ -338,7 +337,7 @@ class Status(Enum):
     CLOSED = 'CLOSED'
 
 
-class VNCHandler(Enum):
+class VNCHandler(PrintableEnum):
 
     """FCO REST API VNCHandler enum.
 
@@ -354,7 +353,7 @@ class VNCHandler(Enum):
     GUACAMOLE = 'GUACAMOLE'
 
 
-class Vnc(Enum):
+class Vnc(PrintableEnum):
 
     """FCO REST API Vnc enum.
 
@@ -368,7 +367,7 @@ class Vnc(Enum):
     GUACAMOLE = 'GUACAMOLE'
 
 
-class IPType(Enum):
+class IPType(PrintableEnum):
 
     """FCO REST API IPType enum.
 
@@ -384,7 +383,7 @@ class IPType(Enum):
     IPV6 = 'IPV6'
 
 
-class TriggerType(Enum):
+class TriggerType(PrintableEnum):
 
     """FCO REST API TriggerType enum.
 
@@ -478,7 +477,7 @@ class TriggerType(Enum):
     POST_MODIFY = 'POST_MODIFY'
 
 
-class BentoBox(Enum):
+class BentoBox(PrintableEnum):
 
     """FCO REST API BentoBox enum.
 
@@ -493,7 +492,7 @@ class BentoBox(Enum):
     FALSE = 'FALSE'
 
 
-class PaymentFunction(Enum):
+class PaymentFunction(PrintableEnum):
 
     """FCO REST API PaymentFunction enum.
 
@@ -523,7 +522,7 @@ class PaymentFunction(Enum):
     REFUND_PAYMENT = 'REFUND_PAYMENT'
 
 
-class Signup(Enum):
+class Signup(PrintableEnum):
 
     """FCO REST API Signup enum.
 
@@ -538,7 +537,7 @@ class Signup(Enum):
     AUTO_SIGNUP = 'AUTO_SIGNUP'
 
 
-class InvocationType(Enum):
+class InvocationType(PrintableEnum):
 
     """FCO REST API InvocationType enum.
 
@@ -552,7 +551,7 @@ class InvocationType(Enum):
     STATIC = 'STATIC'
 
 
-class Aggregation(Enum):
+class Aggregation(PrintableEnum):
 
     """FCO REST API Aggregation enum.
 
@@ -573,7 +572,7 @@ class Aggregation(Enum):
     MIN = 'MIN'
 
 
-class FirewallRuleAction(Enum):
+class FirewallRuleAction(PrintableEnum):
 
     """FCO REST API FirewallRuleAction enum.
 
@@ -590,7 +589,7 @@ class FirewallRuleAction(Enum):
     REJECT = 'REJECT'
 
 
-class ReferralStatus(Enum):
+class ReferralStatus(PrintableEnum):
 
     """FCO REST API ReferralStatus enum.
 
@@ -609,7 +608,7 @@ class ReferralStatus(Enum):
     AWAITING_PURCHASE = 'AWAITING_PURCHASE'
 
 
-class ResourceType(Enum):
+class ResourceType(PrintableEnum):
 
     """FCO REST API ResourceType enum.
 
@@ -756,7 +755,7 @@ class ResourceType(Enum):
     PRODUCTOFFER = 'PRODUCTOFFER'
 
 
-class UnitType(Enum):
+class UnitType(PrintableEnum):
 
     """FCO REST API UnitType enum.
 
@@ -770,7 +769,7 @@ class UnitType(Enum):
     CARRYOVER = 'CARRYOVER'
 
 
-class TransactionState(Enum):
+class TransactionState(PrintableEnum):
 
     """FCO REST API TransactionState enum.
 
@@ -793,7 +792,7 @@ class TransactionState(Enum):
     AWAITINGINTERACTIVEINPUT = 'AWAITINGINTERACTIVEINPUT'
 
 
-class ServerCapability(Enum):
+class ServerCapability(PrintableEnum):
 
     """FCO REST API ServerCapability enum.
 
@@ -846,7 +845,7 @@ class ServerCapability(Enum):
     CAN_REVERT_WHEN_RUNNING = 'CAN_REVERT_WHEN_RUNNING'
 
 
-class Snapshotting(Enum):
+class Snapshotting(PrintableEnum):
 
     """FCO REST API Snapshotting enum.
 
@@ -861,7 +860,7 @@ class Snapshotting(Enum):
     SERVER = 'SERVER'
 
 
-class TransactionType(Enum):
+class TransactionType(PrintableEnum):
 
     """FCO REST API TransactionType enum.
 
@@ -876,7 +875,7 @@ class TransactionType(Enum):
     DEBIT = 'DEBIT'
 
 
-class EmulatedDevices(Enum):
+class EmulatedDevices(PrintableEnum):
 
     """FCO REST API EmulatedDevices enum.
 
@@ -895,7 +894,7 @@ class EmulatedDevices(Enum):
     ALLOW_ANY = 'ALLOW_ANY'
 
 
-class Condition(Enum):
+class Condition(PrintableEnum):
 
     """FCO REST API Condition enum.
 
@@ -966,7 +965,7 @@ class Condition(Enum):
     EARLIER_THAN = 'EARLIER_THAN'
 
 
-class InvocationLevel(Enum):
+class InvocationLevel(PrintableEnum):
 
     """FCO REST API InvocationLevel enum.
 
@@ -989,7 +988,7 @@ class InvocationLevel(Enum):
     MBE = 'MBE'
 
 
-class ReportChartType(Enum):
+class ReportChartType(PrintableEnum):
 
     """FCO REST API ReportChartType enum.
 
@@ -1009,7 +1008,7 @@ class ReportChartType(Enum):
     AREA = 'AREA'
 
 
-class Limits(Enum):
+class Limits(PrintableEnum):
 
     """FCO REST API Limits enum.
 
@@ -1086,7 +1085,7 @@ class Limits(Enum):
     MAX_NETWORK_PUBLIC = 'MAX_NETWORK_PUBLIC'
 
 
-class VirtualizationType(Enum):
+class VirtualizationType(PrintableEnum):
 
     """FCO REST API VirtualizationType enum.
 
@@ -1101,7 +1100,7 @@ class VirtualizationType(Enum):
     CONTAINER = 'CONTAINER'
 
 
-class EmailVAR(Enum):
+class EmailVAR(PrintableEnum):
 
     """FCO REST API EmailVAR enum.
 
@@ -1175,7 +1174,7 @@ class EmailVAR(Enum):
     EMAIL_SUBJECT = 'EMAIL_SUBJECT'
 
 
-class JobStatus(Enum):
+class JobStatus(PrintableEnum):
 
     """FCO REST API JobStatus enum.
 
@@ -1202,7 +1201,7 @@ class JobStatus(Enum):
     IN_PROGRESS = 'IN_PROGRESS'
 
 
-class Capability(Enum):
+class Capability(PrintableEnum):
 
     """FCO REST API Capability enum.
 
@@ -1238,7 +1237,7 @@ class Capability(Enum):
     DELETE = 'DELETE'
 
 
-class ResultOrder(Enum):
+class ResultOrder(PrintableEnum):
 
     """FCO REST API ResultOrder enum.
 
@@ -1253,7 +1252,7 @@ class ResultOrder(Enum):
     DESC = 'DESC'
 
 
-class MeasureType(Enum):
+class MeasureType(PrintableEnum):
 
     """FCO REST API MeasureType enum.
 
@@ -1295,7 +1294,7 @@ class MeasureType(Enum):
     MINUTE = 'MINUTE'
 
 
-class ValidatorType(Enum):
+class ValidatorType(PrintableEnum):
 
     """FCO REST API ValidatorType enum.
 
@@ -1332,7 +1331,7 @@ class ValidatorType(Enum):
     ICON = 'ICON'
 
 
-class RedirectMethod(Enum):
+class RedirectMethod(PrintableEnum):
 
     """FCO REST API RedirectMethod enum.
 
@@ -1348,7 +1347,7 @@ class RedirectMethod(Enum):
     GET = 'GET'
 
 
-class ImageType(Enum):
+class ImageType(PrintableEnum):
 
     """FCO REST API ImageType enum.
 
@@ -1362,7 +1361,7 @@ class ImageType(Enum):
     SERVER = 'SERVER'
 
 
-class Invoicing(Enum):
+class Invoicing(PrintableEnum):
 
     """FCO REST API Invoicing enum.
 
@@ -1377,7 +1376,7 @@ class Invoicing(Enum):
     FALSE = 'FALSE'
 
 
-class GroupType(Enum):
+class GroupType(PrintableEnum):
 
     """FCO REST API GroupType enum.
 
@@ -1395,7 +1394,7 @@ class GroupType(Enum):
     NORMAL = 'NORMAL'
 
 
-class TaxType(Enum):
+class TaxType(PrintableEnum):
 
     """FCO REST API TaxType enum.
 
@@ -1411,7 +1410,7 @@ class TaxType(Enum):
     VAT = 'VAT'
 
 
-class BillingType(Enum):
+class BillingType(PrintableEnum):
 
     """FCO REST API BillingType enum.
 
@@ -1425,7 +1424,7 @@ class BillingType(Enum):
     MASTERBILL = 'MASTERBILL'
 
 
-class MaxLimit(Enum):
+class MaxLimit(PrintableEnum):
 
     """FCO REST API MaxLimit enum.
 
@@ -1445,7 +1444,7 @@ class MaxLimit(Enum):
     MAX_NIC_PER_SERVER = 'MAX_NIC_PER_SERVER'
 
 
-class ResourceKeyType(Enum):
+class ResourceKeyType(PrintableEnum):
 
     """FCO REST API ResourceKeyType enum.
 
@@ -1466,7 +1465,7 @@ class ResourceKeyType(Enum):
     BILLING_ENTITY_KEY = 'BILLING_ENTITY_KEY'
 
 
-class MultitierStorage(Enum):
+class MultitierStorage(PrintableEnum):
 
     """FCO REST API MultitierStorage enum.
 
@@ -1481,7 +1480,7 @@ class MultitierStorage(Enum):
     FALSE = 'FALSE'
 
 
-class ICMPParam(Enum):
+class ICMPParam(PrintableEnum):
 
     """FCO REST API ICMPParam enum.
 
@@ -1544,7 +1543,7 @@ class ICMPParam(Enum):
     SOURCE_QUENCH = 'SOURCE_QUENCH'
 
 
-class Branding(Enum):
+class Branding(PrintableEnum):
 
     """FCO REST API Branding enum.
 
@@ -1559,7 +1558,7 @@ class Branding(Enum):
     FALSE = 'FALSE'
 
 
-class StatementType(Enum):
+class StatementType(PrintableEnum):
 
     """FCO REST API StatementType enum.
 
@@ -1582,7 +1581,7 @@ class StatementType(Enum):
     PAYMENT_MADE = 'PAYMENT_MADE'
 
 
-class InvoiceHeader(Enum):
+class InvoiceHeader(PrintableEnum):
 
     """FCO REST API InvoiceHeader enum.
 
@@ -1627,7 +1626,7 @@ class InvoiceHeader(Enum):
     QUANTITY = 'QUANTITY'
 
 
-class Payment(Enum):
+class Payment(PrintableEnum):
 
     """FCO REST API Payment enum.
 
@@ -1644,7 +1643,7 @@ class Payment(Enum):
     CREDIT_CARD = 'CREDIT_CARD'
 
 
-class StorageCapability(Enum):
+class StorageCapability(PrintableEnum):
 
     """FCO REST API StorageCapability enum.
 
@@ -1668,7 +1667,7 @@ class StorageCapability(Enum):
     CHILDREN_PERSIST_ON_DELETE = 'CHILDREN_PERSIST_ON_DELETE'
 
 
-class PaymentType(Enum):
+class PaymentType(PrintableEnum):
 
     """FCO REST API PaymentType enum.
 
@@ -1683,7 +1682,7 @@ class PaymentType(Enum):
     INVOICE = 'INVOICE'
 
 
-class ServerStatus(Enum):
+class ServerStatus(PrintableEnum):
 
     """FCO REST API ServerStatus enum.
 
@@ -1715,7 +1714,7 @@ class ServerStatus(Enum):
     DELETING = 'DELETING'
 
 
-class FirewallRuleDirection(Enum):
+class FirewallRuleDirection(PrintableEnum):
 
     """FCO REST API FirewallRuleDirection enum.
 
@@ -1730,7 +1729,7 @@ class FirewallRuleDirection(Enum):
     IN = 'IN'
 
 
-class Cloning(Enum):
+class Cloning(PrintableEnum):
 
     """FCO REST API Cloning enum.
 
@@ -1745,7 +1744,7 @@ class Cloning(Enum):
     SERVER = 'SERVER'
 
 
-class FDLReturnType(Enum):
+class FDLReturnType(PrintableEnum):
 
     """FCO REST API FDLReturnType enum.
 
@@ -1772,7 +1771,7 @@ class FDLReturnType(Enum):
     UUID = 'UUID'
 
 
-class SnapshotType(Enum):
+class SnapshotType(PrintableEnum):
 
     """FCO REST API SnapshotType enum.
 
@@ -1786,7 +1785,7 @@ class SnapshotType(Enum):
     SERVER = 'SERVER'
 
 
-class NetworkType(Enum):
+class NetworkType(PrintableEnum):
 
     """FCO REST API NetworkType enum.
 
@@ -1806,7 +1805,7 @@ class NetworkType(Enum):
     INTERWORKING = 'INTERWORKING'
 
 
-class JobType(Enum):
+class JobType(PrintableEnum):
 
     """FCO REST API JobType enum.
 
@@ -2150,7 +2149,7 @@ class JobType(Enum):
     RESUME_TRANSACTION = 'RESUME_TRANSACTION'
 
 
-class DiskStatus(Enum):
+class DiskStatus(PrintableEnum):
 
     """FCO REST API DiskStatus enum.
 
@@ -2167,7 +2166,7 @@ class DiskStatus(Enum):
     ATTACHED_TO_SERVER = 'ATTACHED_TO_SERVER'
 
 
-class BillingEntityVAR(Enum):
+class BillingEntityVAR(PrintableEnum):
 
     """FCO REST API BillingEntityVAR enum.
 

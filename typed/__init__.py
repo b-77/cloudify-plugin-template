@@ -262,9 +262,6 @@ class Typed(object):
     # __hash__ = None
 
     def untype(self):
-        # print 'typed: untyping'
-        # print self._data
-        # print type(self._data)
         if isinstance(self._data, list):
             untyped = list(self._data)
             for k, v in enumerate(untyped):
@@ -326,6 +323,7 @@ def factory(cls, mapping=None, name=None, **kwargs):
 
 
 class Map(Typed):  # TODO: setdefault, cmp/lt/gt/etc.
+
     """A not-deriving friendly typed dict implementation."""
 
     key_type = ImmutableType()
@@ -380,7 +378,6 @@ class Map(Typed):  # TODO: setdefault, cmp/lt/gt/etc.
                                        'item_type': self.item_type})
 
     def __setitem__(self, key, item):
-        # print 'Adding', item, self.item_type
         if isinstance(key, self.key_type):
             if isinstance(item, self.item_type) \
                     or (item is None and self._noneable):
@@ -448,7 +445,7 @@ class Map(Typed):  # TODO: setdefault, cmp/lt/gt/etc.
 
 class Array(Typed):  # TODO: mul, add
 
-    """AAAAAAAAAAAAAAAAAAAA."""
+    """A typed list implementation."""
 
     item_type = ImmutableType()
     _item_type_check = lambda i: hasattr(i, '__cmp__') or hasattr(i, '__lt__')\
@@ -492,13 +489,7 @@ class Array(Typed):  # TODO: mul, add
         self.__class__ = factory(Array, {'item_type': self.item_type})
 
     def extend(self, other):
-        # TODO: check for iterable, somehow
-        try:
-            # if any([not isinstance(item, self.item_type) for item in other]):
-            #     raise TypeError('Expected all of type {}, got types {}'.format(
-            #         self.item_type.__name__, set([type(item).__name__
-            #
-            #            for item in other])))
+        if hasattr(other, '__iter__'):
             other = list(other)
             error = TypeError('Expected all of type {}, got types {}'
                     ,format(set([type(item) for item in other])))
@@ -515,10 +506,9 @@ class Array(Typed):  # TODO: mul, add
                             raise error
                 elif not isinstance(v, self.item_type):
                     raise error
-        except AttributeError:
-            raise
-            # raise TypeError('Expected iterable object, got {}'
-            #                 .format(type(other).__name__))
+        else:
+            raise TypeError('type {} is not iterable'.format(
+                type(other).__name__))
 
         for i in other:
             self.append(i)
