@@ -3,12 +3,10 @@
 """Abstraction of FCO API in the form of a Python wrapper."""
 
 import fcoclient.clients as clients
-import rest_types.enums as enums
-import rest_types.cobjects as cobjects
-import rest_types.endpoints as endpoints
+import fcoclient.exceptions as exceptions
+import resttypes.endpoints as endpoints
 
 import json
-import inspect
 
 
 class REST(object):
@@ -22,7 +20,6 @@ class REST(object):
 
     def __getattr__(self, item):
         """Get relevant Endpoint object when accessed."""
-        # back to wrapper for clarity?
         class Endpoint(object):
             def __call__(eself, *args, **kwargs):
                 self.logger.debug('API endpoint {} requested'.format(item))
@@ -33,7 +30,6 @@ class REST(object):
     def query(self, endpoint, parameters=None, data=None, validate=False,
               **kwargs):
         endpoint = endpoint[0].capitalize() + endpoint[1:]
-        # TODO: exception handling
         endpoint = getattr(endpoints, endpoint)(parameters, data, **kwargs)
         type, url = endpoint.endpoint
         if type is endpoints.Verbs.PUT:
@@ -45,7 +41,7 @@ class REST(object):
         elif type is endpoints.Verbs.DELETE:
             fn = self.client.delete
         else:
-            raise TypeError('unsupported verb')
+            raise exceptions.NonRecoverableError('unsupported API verb')
 
         payload = endpoint.untype()
 

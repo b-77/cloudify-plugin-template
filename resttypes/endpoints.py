@@ -2,11 +2,11 @@
 
 """Provides abstraction of the FCO REST API endpoints."""
 
-import rest_types.enums as enums
-import rest_types.cobjects as cobjects
-from rest_types import (to_str, rat_check)
-from rest_types import is_acceptable as c_is_acceptable
-from rest_types import construct_data as c_construct_data
+import resttypes.enums as enums
+import resttypes.cobjects as cobjects
+from resttypes import (to_str, rat_check)
+from resttypes import is_acceptable as c_is_acceptable
+from resttypes import construct_data as c_construct_data
 from typed import Typed
 from typed.builtins import (List, Dict)
 

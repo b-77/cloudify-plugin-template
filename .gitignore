@@ -1,6 +1,7 @@
 .idea
 venv
 generators
+isetup.py
 
 *.py[cod]
 

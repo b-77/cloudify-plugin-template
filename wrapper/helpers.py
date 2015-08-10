@@ -10,7 +10,7 @@ from functools import wraps
 from fcoclient.clients import (get_client, RESTClient, PROP_CLIENT_CONFIG)
 from fcoclient.api import REST as RESTApi
 import fcoclient.exceptions as fco_exceptions
-import rest_types.cobjects as cobjects
+import resttypes.cobjects as cobjects
 
 
 def _find_instanceof_in_kwargs(cls, kw):

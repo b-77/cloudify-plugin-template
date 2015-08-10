@@ -34,6 +34,7 @@ PROP_RAM_AMOUNT = 'ram_amount'
 PROP_PUBLIC_KEYS = 'public_keys'
 PROP_SERVER_PO_NAME = 'server_type'
 PROP_CLUSTER = 'cluster_uuid'
+PROP_NET = 'network_uuid'
 
 RPROP_UUID = 'uuid'
 RPROP_DISKS = 'disks'
@@ -67,6 +68,7 @@ def create(fco_api, *args, **kwargs):
     ram_amount = ctx.node.properties.get(PROP_RAM_AMOUNT)
     public_keys = ctx.node.properties.get(PROP_PUBLIC_KEYS, [])
     server_po_name = ctx.node.properties.get(PROP_SERVER_PO_NAME)
+    net_uuid = ctx.node.properties.get(PROP_NET)
 
     # Get cluster and VDC UUID
 
@@ -128,7 +130,8 @@ def create(fco_api, *args, **kwargs):
     ctx.logger.info('Server ACTIVE')
 
     # Get network
-    net_uuid = get_network_uuid(fco_api, net_type, cluster_uuid)
+    if not net_uuid:
+        net_uuid = get_network_uuid(fco_api, net_type, cluster_uuid)
     if not net_uuid:
         net_uuid = create_network(fco_api, cluster_uuid, net_type, vdc_uuid)\
             .itemUUID

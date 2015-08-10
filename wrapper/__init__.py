@@ -3,7 +3,7 @@
 """Provides a wrapper that functions as the Cloudify interface."""
 
 from __future__ import print_function
-from rest_types import cobjects
+from resttypes import cobjects
 from time import sleep
 
 __author__ = 'alen'
@@ -56,6 +56,15 @@ def wait_for_status(fco_api, res_uuid, status, res_type, time=5, step=24):
     return bool(result_set.totalCount)
 
 
+def wait_for_job(fco_api, job_uuid, time=5, step=24):
+    while step:
+        job = get_resource(fco_api, job_uuid, 'JOB')
+        if job.status in ['IN_PROGRESS', 'WAITING', 'NOT_STARTED', 'SUSPENDED']:
+            continue
+        return job.status == 'SUCCESSFUL'
+    return False
+
+
 def get_resource(fco_api, res_uuid, res_type):
     fc = cobjects.FilterCondition(field='resourceUUID',
                                   condition='IS_EQUAL_TO',
@@ -68,8 +77,8 @@ def get_resource(fco_api, res_uuid, res_type):
         return 'NOT_FOUND'
 
 
-def first_resource(fco_api, type_):
-    return fco_api.resourceType(resourceType=type_).list[0]
+def first_resource(fco_api, res_type):
+    return fco_api.resourceType(resourceType=res_type).list[0]
 
 
 def get_resource_type(fco_api, res_type, limit=False, number=200, page=0):
