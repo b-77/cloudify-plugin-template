@@ -215,16 +215,16 @@ def create(fco_api, *args, **kwargs):
     public_key = get_resource(fco_api, key_uuid, 'SSHKEY').publicKey
     username = server.initialUser
     password = server.initialPassword
-    # try:
-    #     s = pxssh.pxssh()
-    #     s.login(server_ip, username, password)
-    #     s.sendline('echo "{}" >> ~/.ssh/authorized_keys'.format(public_key))
-    #     s.prompt()
-    #     s.logout()
-    # except pxssh.ExceptionPxssh as e:
-    #     logger.error('pexpect error: %s', str(e))
-    # finally:
-    #     call(['sed', '-i', '/{}.*/d'.format('\\.'.join(server_ip.split('.')))])
+    try:
+        s = pxssh.pxssh()
+        s.login(server_ip, username, password)
+        s.sendline('echo "{}" >> ~/.ssh/authorized_keys'.format(public_key))
+        s.prompt()
+        s.logout()
+    except pxssh.ExceptionPxssh as e:
+        logger.error('pexpect error: %s', str(e))
+    finally:
+        call(['sed', '-i', '/{}.*/d'.format('\\.'.join(server_ip.split('.')))])
 
     rp_[RPROP_UUID] = server_uuid
     rp_[RPROP_IP] = server_ip
