@@ -10,11 +10,12 @@ __author__ = 'alen'
 # TODO: completely shift from mapping to kwargs everywhere
 
 
-class type_check(object):
+class TypeCheck(object):
 
-    """Performs type-checking as a decodescriptorator.
+    """Performs type-checking as a descriptor decorator.
 
-    Defeated its purpose 5 minutes later.
+    Defeated its purpose 5 minutes later. Useful as a reminder if reverting
+    back to decorator with no inputs.
     """
 
     def __init__(self, *types):
@@ -35,11 +36,11 @@ class type_check(object):
             return f(inst, *args, **kwargs)
         return _type_check
 
-    def __get__(self, inst, type=None):
+    def __get__(self, inst, type_=None):
         """Useful if params don't get passed to get right function context."""
         if inst is None or self.func is None:
             return self
-        return self.__class__(self.func.__get__(inst, type))
+        return self.__class__(self.func.__get__(inst, type_))
 
 
 class _NoneType(object):
@@ -59,11 +60,11 @@ _None = _NoneType()
 class MetaTyped(type):
     """Get ready for this world of pain."""
 
-    def __new__(meta, name, bases, attribs):
+    def __new__(mcs, name, bases, attribs):
         types = [a for a, p in attribs.items() if
                  isinstance(p, ImmutableType)]
         attribs['_types'] = types
-        return type.__new__(meta, name, bases, attribs)
+        return type.__new__(mcs, name, bases, attribs)
 
     def __instancecheck__(self, other):
         self_template = self
@@ -77,21 +78,14 @@ class MetaTyped(type):
         except:
             pass
 
-        # print type(other).__name__, '<=', self.__name__
-        # print id(other)
-
         try:
             while self_template != other_template:
                 other_template = other_template.__base__
-            # print '  Common base:', other_template.__name__
             for t in other_template._types:
-                # print ' ', t
                 if t in self._types:
                     try:
                         a = getattr(self, t)
-                        # print ' ', t, 'expected', a.__name__
                     except:
-                        # print ' ', t, 'not expected'
                         continue
                     if not issubclass(getattr(other, t), a):
                         # print ' ', t, 'failed as', getattr(other, t).__name__
@@ -529,29 +523,29 @@ class Array(Typed):  # TODO: mul, add
         for i in other:
             self.append(i)
 
-    @type_check((2, 'item_type'))
+    @TypeCheck((2, 'item_type'))
     def __setitem__(self, key, item):
         self._data[key] = item
 
-    @type_check('item_type')
+    @TypeCheck('item_type')
     def append(self, item):
         self._data.append(item)
 
     def index(self, index):
         return self._data[index]
 
-    @type_check((2, 'item_type'))
+    @TypeCheck((2, 'item_type'))
     def insert(self, index, item):
         self._data.insert(index, item)
 
     def pop(self):
         self._data.pop()
 
-    @type_check('item_type')
+    @TypeCheck('item_type')
     def remove(self, item):
         self._data.remove(item)
 
-    @type_check('item_type')
+    @TypeCheck('item_type')
     def count(self, item):
         self._data.count(item)
 
