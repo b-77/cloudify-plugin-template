@@ -33,7 +33,10 @@ class REST(object):
         endpoint = getattr(endpoints, endpoint)(parameters, data, **kwargs)
         type_, url = endpoint.endpoint
 
+        self.logger.info('%s', endpoint)
         payload = endpoint.untype()
+        self.logger.info('%s', payload)
+
         if not len(payload):
             payload = None
 
