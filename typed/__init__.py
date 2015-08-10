@@ -199,8 +199,8 @@ class Typed(object):
         return self.__str__()
 
     def __eq__(self, other):
-        return isinstance(other, type(self)) and isinstance(self, type(other))\
-               and (self._data is None or self._data == other._data)
+        return (isinstance(other, type(self)) and isinstance(self, type(other))
+                and (self._data is None or self._data == other._data))
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -552,101 +552,3 @@ class Array(Typed):  # TODO: mul, add
     def __imul__(self, other):
         self._data *= other
         return self
-
-
-# SIMPLE TESTS
-
-class Dummy(Typed):
-    pass
-
-
-class Map2(Typed):
-    """Unfriendly :(."""
-
-    key_type = ImmutableType()
-    item_type = ImmutableType()
-
-ta = Map({1: 3, 2: 2, 3: 1}, key_type=int, item_type=int)
-t1 = factory(Map, {'key_type': int, 'item_type': int})
-tb = t1({1: 3, 2: 2, 3: 1})
-tc = t1({1: 3, 2: 2})
-td = Map2(key_type=int, item_type=int)
-
-tx = factory(Map, {'key_type': object, 'item_type': int})
-ty = Map({1: 3, 2: 2, 3: 1}, key_type=object, item_type=int)
-tz = tx({1: 3, 2: 2, 3: 1})
-
-tn = factory(Map, {'key_type': int, 'item_type': t1})
-tm = factory(Map, {'key_type': object, 'item_type': t1})
-to = factory(Map, {'key_type': int, 'item_type': object})
-ti = tn()
-tj = Map({10: ta}, key_type=int, item_type=t1)
-tk = tm(tj)
-tl = to({10: ta})
-tg = to({1: 3, 2: 2, 3: 1})
-th = Map({1: 3, 2: 2, 3: 1}, key_type=object, item_type=int)
-tr = Map({1: 3, 2: 2, 3: 1}, key_type=int, item_type=object)
-
-try:
-    tt = tn(to)
-    assert False
-except:
-    pass
-
-assert isinstance(ta, Map)
-assert isinstance(tb, Map)
-assert isinstance(tc, Map)
-assert isinstance(ta, t1)
-assert isinstance(tb, t1)
-assert isinstance(tc, t1)
-assert not isinstance(td, t1)
-assert isinstance(Map(key_type=int, item_type=int), t1)
-assert isinstance(td, Typed)
-assert not isinstance(object(), Typed)
-assert not isinstance(Typed(), t1)
-assert not isinstance(Typed(), Dummy)
-assert ta == tb
-assert not ta != tb
-assert not ta == tc
-assert tc != tb
-assert ta != tk
-assert ta != tg
-assert ta != th
-assert tb != tg
-assert tb != th
-assert tg != th
-assert tr == tg
-assert type(tr) != type(tg)
-assert isinstance(tr, type(tg))
-assert isinstance(tg, type(tr))
-assert isinstance(ta, type(tg))
-assert not isinstance(tg, type(ta))  # TODO: further checking of post-init type
-
-assert isinstance(ty, tx)
-assert isinstance(ty, Map)
-assert isinstance(ty, Typed)
-assert isinstance(tz, tx)
-assert isinstance(tz, Map)
-assert isinstance(tz, Typed)
-assert isinstance(ta, tx)
-assert isinstance(tb, tx)
-assert not isinstance(td, tx)
-assert not isinstance(tz, t1)
-assert not isinstance(ty, t1)
-
-assert isinstance(ti, tn)
-assert isinstance(ti, tm)
-assert isinstance(ti, to)
-assert isinstance(tk, tm)
-assert not isinstance(tk, tn)
-assert not isinstance(tk, to)
-assert isinstance(tj, tn)
-assert isinstance(tk, tm)
-assert not isinstance(tk, to)
-
-assert ta.is_acceptable({1:1, 2:2, 3:3})
-assert not ta.is_acceptable({1:1, 2: "alen", 3:3})
-assert t1.is_acceptable({1:1, 2:2, 3:3})
-assert not t1.is_acceptable({1:1, 2: "alen", 3:3})
-assert not tn.is_acceptable({1: object()})
-assert tn.is_acceptable({1: ta})
