@@ -79,8 +79,8 @@ def create(fco_api, *args, **kwargs):
 
     # Set up VDC
     if not vdc_uuid:
-        vdc_uuid = create_vdc(fco_api, cluster_uuid, 'VDC ' + datetime.now().strftime(
-            '%Y-%m-%d %H:%M:%S')).itemUUID
+        vdc_uuid = create_vdc(fco_api, cluster_uuid, 'VDC ' + datetime.now()
+                              .strftime('%Y-%m-%d %H:%M:%S')).itemUUID
     if not vdc_uuid:
         raise Exception('Could not get or create VDC!')
 
@@ -96,7 +96,8 @@ def create(fco_api, *args, **kwargs):
 
     # Get disk PO
     image_disk_po_name = '{} GB Storage Disk'.format(image.size)
-    boot_disk_po_uuid = get_prod_offer(fco_api, image_disk_po_name).resourceUUID
+    boot_disk_po_uuid = get_prod_offer(fco_api, image_disk_po_name)\
+        .resourceUUID
     if not boot_disk_po_uuid:
         raise Exception('No product offer found! ({})'.format(
             image_disk_po_name))
@@ -129,15 +130,16 @@ def create(fco_api, *args, **kwargs):
     # Get network
     net_uuid = get_network_uuid(fco_api, net_type, cluster_uuid)
     if not net_uuid:
-        net_uuid = create_network(fco_api, cluster_uuid, net_type, vdc_uuid).itemUUID
+        net_uuid = create_network(fco_api, cluster_uuid, net_type, vdc_uuid)\
+            .itemUUID
     if not net_uuid:
         raise Exception('Failed to create network')
 
     ctx.logger.info('Network UUID: ' + net_uuid)
 
     # Create NIC
-    nic_uuid = create_nic(fco_api, cluster_uuid, net_type, net_uuid, vdc_uuid, '0')\
-        .itemUUID
+    nic_uuid = create_nic(fco_api, cluster_uuid, net_type, net_uuid, vdc_uuid,
+                          '0').itemUUID
     if not wait_for_state(fco_api, nic_uuid, 'ACTIVE', 'NIC'):
         raise Exception('NIC failed to create in time!')
 
@@ -152,7 +154,8 @@ def create(fco_api, *args, **kwargs):
 
     # Attach NIC
     attach_nic_job = attach_nic(fco_api, server_uuid, nic_uuid, 1)
-    if not wait_for_status(fco_api, attach_nic_job.resourceUUID, 'SUCCESSFUL','JOB'):
+    if not wait_for_status(fco_api, attach_nic_job.resourceUUID, 'SUCCESSFUL',
+                           'JOB'):
         raise Exception('Attaching NIC failed to complete in time!')
 
     server = get_resource(fco_api, server_uuid, 'SERVER')

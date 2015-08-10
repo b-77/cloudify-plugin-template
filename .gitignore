@@ -1,3 +1,7 @@
+.idea
+venv
+generators
+
 *.py[cod]
 
 # C extensions
