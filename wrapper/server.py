@@ -46,6 +46,7 @@ PROP_KEY = 'key_uuid'
 
 RPROP_UUID = 'uuid'
 RPROP_DISKS = 'disks'
+RPROP_NIC = 'nic'
 RPROP_NICS = 'nics'
 RPROP_IP = 'ip'
 RPROP_USER = 'username'
@@ -117,19 +118,28 @@ def create(fco_api, *args, **kwargs):
     ctx.logger.info('Boot disk PO UUID: ' + boot_disk_po_uuid)
 
     # Create server
-    server_name = 'VM ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    create_server_job = create_server(fco_api, server_name, server_po_uuid,
-                                      image_uuid, cluster_uuid, vdc_uuid,
-                                      cpu_count, ram_amount,
-                                      boot_disk_po_uuid, [key_uuid])
-    server_uuid = create_server_job.itemUUID
+    try:
+        server_uuid = ctx.instance.runtime_properties[RPROP_UUID]
+    except KeyError:
+        server_name = 'VM ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        create_server_job = create_server(fco_api, server_name, server_po_uuid,
+                                          image_uuid, cluster_uuid, vdc_uuid,
+                                          cpu_count, ram_amount,
+                                          boot_disk_po_uuid, [key_uuid])
+        server_uuid = create_server_job.itemUUID
+        ctx.instance.runtime_properties[RPROP_UUID] = server_uuid
 
-    ctx.logger.info('Server UUID: ' + vdc_uuid)
+    ctx.logger.info('Server UUID: ' + server_uuid)
+
+    server = get_resource(fco_api, server_uuid, 'SERVER')
+    server_nics = [nic.resourceUUID for nic in server.nics]
+    server_keys = [key.resourceUUID for key in server.sshkeys]
 
     # Add keys
     for single_key in public_keys:
-        key_uuid = create_ssh_key(fco_api, single_key, '').itemUUID
-        attach_ssh_key(fco_api, server_uuid, key_uuid)
+        if single_key not in server_keys:
+            key_uuid = create_ssh_key(fco_api, single_key, '').itemUUID
+            attach_ssh_key(fco_api, server_uuid, key_uuid)
 
     ctx.logger.info('Keys attached')
 
@@ -151,12 +161,16 @@ def create(fco_api, *args, **kwargs):
     ctx.logger.info('Network UUID: ' + net_uuid)
 
     # Create NIC
-    nic_uuid = create_nic(fco_api, cluster_uuid, net_type, net_uuid, vdc_uuid,
-                          '0').itemUUID
-    if not wait_for_state(fco_api, nic_uuid, 'ACTIVE', 'NIC'):
-        raise Exception('NIC failed to create in time!')
+    try:
+        nic_uuid = ctx.instance.runtime_properties[RPROP_NIC]
+    except KeyError:
+        nic_uuid = create_nic(fco_api, cluster_uuid, net_type, net_uuid,
+                              vdc_uuid, '0').itemUUID
+        if not wait_for_state(fco_api, nic_uuid, 'ACTIVE', 'NIC'):
+            raise Exception('NIC failed to create in time!')
+        ctx.instance.runtime_properties[RPROP_NIC] = nic_uuid
 
-    ctx.logger.info('NIC UUID ' + nic_uuid)
+    ctx.logger.info('NIC UUID: ' + nic_uuid)
 
     # Stop server if started
     if get_server_state(fco_api, server_uuid) != 'STOPPED':
@@ -166,15 +180,14 @@ def create(fco_api, *args, **kwargs):
     ctx.logger.info('Server STOPPED')
 
     # Attach NIC
-    attach_nic_job = attach_nic(fco_api, server_uuid, nic_uuid, 1)
-    if not wait_for_status(fco_api, attach_nic_job.resourceUUID, 'SUCCESSFUL',
-                           'JOB'):
-        raise Exception('Attaching NIC failed to complete in time!')
-
-    server = get_resource(fco_api, server_uuid, 'SERVER')
-    server_uuid = server.resourceUUID  # does it change?
-
-    ctx.logger.info('NICs attached')
+    if nic_uuid not in server_nics:
+        attach_nic_job = attach_nic(fco_api, server_uuid, nic_uuid, 1)
+        if not wait_for_status(fco_api, attach_nic_job.resourceUUID,
+                               'SUCCESSFUL', 'JOB'):
+            raise Exception('Attaching NIC failed to complete in time!')
+        ctx.logger.info('NICs attached')
+    else:
+        ctx.logger.info('NICs already attached')
 
     # attach any disks now
 
@@ -187,8 +200,7 @@ def create(fco_api, *args, **kwargs):
 
     ctx.logger.info('Server RUNNING')
 
-    server = get_resource(fco_api, server_uuid, 'SERVER')
-    server_ip = server.nics[0].ipAddresses[0].ipAddress
+    server_ip = get_resource(fco_api, nic_uuid, 'NIC').ipAddresses[0].ipAddress
     server_port = 22
 
     if not ssh_probe(server_ip, server_port, step=-1):
@@ -206,7 +218,7 @@ def create(fco_api, *args, **kwargs):
     except pxssh.ExceptionPxssh as e:
         logger.error('pexpect error: %s', str(e))
     finally:
-        call(['sed', '-i', '/{}.*/d'.format('\\.'.join(hostname.split('.')))])
+        call(['sed', '-i', '/{}.*/d'.format('\\.'.join(server_ip.split('.')))])
 
     ctx.instance.runtime_properties[RPROP_UUID] = server.resourceUUID
     ctx.instance.runtime_properties[RPROP_DISKS] = [d.resourceUUID for d in server.disks]
@@ -226,14 +238,6 @@ def create(fco_api, *args, **kwargs):
 @with_fco_api
 def delete(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
-    # for d in ctx.instance.runtime_properties[RPROP_DISKS]:
-    #     job_uuid = delete_resource(fco_api, d, 'DISK').resourceUUID
-    #     if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
-    #         raise Exception('Failed to delete disk from server')
-    # for n in ctx.instance.runtime_properties[RPROP_NICS]:
-    #     job_uuid = delete_resource(fco_api, n, 'NIC').resourceUUID
-    #     if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
-    #         raise Exception('Failed to delete NIC from server')
     job_uuid = delete_resource(fco_api, server_uuid, 'SERVER', True).resourceUUID
     if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
         raise Exception('Failed to delete server')
