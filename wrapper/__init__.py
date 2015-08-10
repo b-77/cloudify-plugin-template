@@ -89,8 +89,8 @@ def get_resource_type(fco_api, res_type, limit=False, number=200, page=0):
     return fco_api.listResources(resourceType=res_type).list
 
 
-def delete_resource(fco_api, res_uuid, res_type):
-    return fco_api.deleteResource(resourceUUID=res_uuid, resourceType=res_type)
+def delete_resource(fco_api, res_uuid, res_type, cascade=False):
+    return fco_api.deleteResource(resourceUUID=res_uuid, resourceType=res_type, cascade=cascade)
 
 
 def get_prod_offer(fco_api, prod_offer_name):

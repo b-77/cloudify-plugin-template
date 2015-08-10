@@ -208,15 +208,15 @@ def create(fco_api, *args, **kwargs):
 @with_fco_api
 def delete(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
-    for d in ctx.instance.runtime_properties[RPROP_DISKS]:
-        job_uuid = delete_resource(fco_api, d, 'DISK').resourceUUID
-        if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
-            raise Exception('Failed to delete disk from server')
-    for n in ctx.instance.runtime_properties[RPROP_NICS]:
-        job_uuid = delete_resource(fco_api, n, 'NIC').resourceUUID
-        if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
-            raise Exception('Failed to delete NIC from server')
-    job_uuid = delete_resource(fco_api, server_uuid, 'SERVER').resourceUUID
+    # for d in ctx.instance.runtime_properties[RPROP_DISKS]:
+    #     job_uuid = delete_resource(fco_api, d, 'DISK').resourceUUID
+    #     if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
+    #         raise Exception('Failed to delete disk from server')
+    # for n in ctx.instance.runtime_properties[RPROP_NICS]:
+    #     job_uuid = delete_resource(fco_api, n, 'NIC').resourceUUID
+    #     if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
+    #         raise Exception('Failed to delete NIC from server')
+    job_uuid = delete_resource(fco_api, server_uuid, 'SERVER', True).resourceUUID
     if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
         raise Exception('Failed to delete server')
 
