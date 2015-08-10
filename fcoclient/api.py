@@ -32,23 +32,23 @@ class REST(object):
         endpoint = endpoint[0].capitalize() + endpoint[1:]
         endpoint = getattr(endpoints, endpoint)(parameters, data, **kwargs)
         type, url = endpoint.endpoint
+
+        payload = endpoint.untype()
+        if not len(payload):
+            payload = None
+
         if type is endpoints.Verbs.PUT:
             fn = self.client.put
         elif type is endpoints.Verbs.GET:
             fn = self.client.get
         elif type is endpoints.Verbs.POST:
             fn = self.client.post
+            if payload:
+                payload = json.JSONEncoder().encode(payload)
         elif type is endpoints.Verbs.DELETE:
             fn = self.client.delete
         else:
             raise exceptions.NonRecoverableError('unsupported API verb')
-
-        payload = endpoint.untype()
-
-        if not len(payload):
-            payload = None
-        else:
-            payload = json.JSONEncoder().encode(payload)
 
         rv = fn(url, payload)
 
