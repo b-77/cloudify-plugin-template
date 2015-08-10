@@ -17,7 +17,7 @@ def get_token(fco_api):
     return fco_api.getAuthenticationToken(automaticallyRenew=True).publicToken
 
 
-# TODO: time delta and parallel job
+# TODO: time delta and parallel jobs
 def wait_for_state(fco_api, res_uuid, state, res_type, time=10, step=10):
     fc1 = cobjects.FilterCondition(field='resourceUUID',
                                    condition='IS_EQUAL_TO',
