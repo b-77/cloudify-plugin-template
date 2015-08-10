@@ -21,12 +21,10 @@ class REST(object):
 
     def __getattr__(self, item):
         """Get relevant Endpoint object when accessed."""
-        class Endpoint(object):
-            def __call__(eself, *args, **kwargs):
-                self.logger.debug('REST API endpoint request: %s', item)
-                return self.query(item, *args, **kwargs)
-
-        return Endpoint()
+        def wrapper(*args, **kwargs):
+            self.logger.debug('REST API endpoint request: %s', item)
+            return self.query(item, *args, **kwargs)
+        return wrapper
 
     def query(self, endpoint, parameters=None, data=None, validate=False,
               **kwargs):
