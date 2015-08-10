@@ -27,6 +27,8 @@ class ComplexObject(Typed):
 
         if data is None:
             data = {}
+        elif isinstance(data, ComplexObject):
+            data = data._data.copy()
 
         if hasattr(data, 'update'):
             data.update(kwargs)

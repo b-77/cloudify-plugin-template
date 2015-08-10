@@ -39,6 +39,7 @@ PROP_PUBLIC_KEYS = 'public_keys'
 PROP_SERVER_PO_NAME = 'server_type'
 PROP_CLUSTER = 'cluster_uuid'
 PROP_NET = 'net_uuid'
+PROP_KEY = 'key_uuid'
 
 RPROP_UUID = 'uuid'
 RPROP_DISKS = 'disks'
@@ -73,6 +74,7 @@ def create(fco_api, *args, **kwargs):
     public_keys = ctx.node.properties.get(PROP_PUBLIC_KEYS, [])
     server_po_name = ctx.node.properties.get(PROP_SERVER_PO_NAME)
     net_uuid = ctx.node.properties.get(PROP_NET)
+    key_uuid = ctx.node.properties.get(PROP_KEY)
 
     # Get cluster and VDC UUID
 
@@ -115,7 +117,7 @@ def create(fco_api, *args, **kwargs):
     create_server_job = create_server(fco_api, server_name, server_po_uuid,
                                       image_uuid, cluster_uuid, vdc_uuid,
                                       cpu_count, ram_amount,
-                                      boot_disk_po_uuid)
+                                      boot_disk_po_uuid, [key_uuid])
     server_uuid = create_server_job.itemUUID
 
     ctx.logger.info('Server UUID: ' + vdc_uuid)

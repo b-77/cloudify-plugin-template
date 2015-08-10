@@ -9,6 +9,7 @@ node_types:
     properties:
       auth: {}
       image_uuid: {}
+      key_uuid: {}
       net_uuid: {}
       net_type:
         default: 'IP'
