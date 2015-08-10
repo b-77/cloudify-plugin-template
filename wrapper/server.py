@@ -70,16 +70,19 @@ def ssh_probe(server_ip, server_port=22, time=10, step=90):
 @operation
 @with_fco_api
 def create(fco_api, *args, **kwargs):
+    rp_ = ctx.instance.runtime_properties
+    np_ = ctx.node.properties
+
     ctx.logger.info('starting server creation')
 
-    image_uuid = ctx.node.properties.get(PROP_IMAGE)
-    net_type = ctx.node.properties.get(PROP_NET_TYPE, 'IP')
-    cpu_count = ctx.node.properties.get(PROP_CPU_COUNT)
-    ram_amount = ctx.node.properties.get(PROP_RAM_AMOUNT)
-    public_keys = ctx.node.properties.get(PROP_PUBLIC_KEYS, [])
-    server_po_name = ctx.node.properties.get(PROP_SERVER_PO_NAME)
-    net_uuid = ctx.node.properties.get(PROP_NET)
-    key_uuid = ctx.node.properties.get(PROP_KEY)
+    image_uuid = np_.get(PROP_IMAGE)
+    net_type = np_.get(PROP_NET_TYPE, 'IP')
+    cpu_count = np_.get(PROP_CPU_COUNT)
+    ram_amount = np_.get(PROP_RAM_AMOUNT)
+    public_keys = np_.get(PROP_PUBLIC_KEYS, [])
+    server_po_name = np_.get(PROP_SERVER_PO_NAME)
+    net_uuid = np_.get(PROP_NET)
+    key_uuid = np_.get(PROP_KEY)
 
     # Get cluster and VDC UUID
 
@@ -87,7 +90,7 @@ def create(fco_api, *args, **kwargs):
     ctx.logger.info('fco_api: ' + str(fco_api))
 
     image = get_image(fco_api, image_uuid)
-    cluster_uuid = ctx.node.properties.get(PROP_CLUSTER) or image.clusterUUID
+    cluster_uuid = np_.get(PROP_CLUSTER) or image.clusterUUID
     vdc_uuid = get_first_vdc(fco_api, cluster_uuid).resourceUUID
 
     # Set up VDC
@@ -119,7 +122,7 @@ def create(fco_api, *args, **kwargs):
 
     # Create server
     try:
-        server_uuid = ctx.instance.runtime_properties[RPROP_UUID]
+        server_uuid = rp_[RPROP_UUID]
     except KeyError:
         server_name = 'VM ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         create_server_job = create_server(fco_api, server_name, server_po_uuid,
@@ -127,7 +130,7 @@ def create(fco_api, *args, **kwargs):
                                           cpu_count, ram_amount,
                                           boot_disk_po_uuid, [key_uuid])
         server_uuid = create_server_job.itemUUID
-        ctx.instance.runtime_properties[RPROP_UUID] = server_uuid
+        rp_[RPROP_UUID] = server_uuid
 
     ctx.logger.info('Server UUID: ' + server_uuid)
 
@@ -162,13 +165,13 @@ def create(fco_api, *args, **kwargs):
 
     # Create NIC
     try:
-        nic_uuid = ctx.instance.runtime_properties[RPROP_NIC]
+        nic_uuid = rp_[RPROP_NIC]
     except KeyError:
         nic_uuid = create_nic(fco_api, cluster_uuid, net_type, net_uuid,
                               vdc_uuid, '0').itemUUID
         if not wait_for_state(fco_api, nic_uuid, 'ACTIVE', 'NIC'):
             raise Exception('NIC failed to create in time!')
-        ctx.instance.runtime_properties[RPROP_NIC] = nic_uuid
+        rp_[RPROP_NIC] = nic_uuid
 
     ctx.logger.info('NIC UUID: ' + nic_uuid)
 
@@ -210,35 +213,39 @@ def create(fco_api, *args, **kwargs):
 
     # Actually provision key
     public_key = get_resource(fco_api, key_uuid, 'SSHKEY').publicKey
+    username = server.initialUser
+    password = server.initialPassword
     try:
         s = pxssh.pxssh()
-        s.login(server_ip, server.initialUser, server.initialPassword)
+        s.login(server_ip, username, password)
         s.sendline('echo "{}" >> ~/.ssh/authorized_keys'.format(public_key))
+        s.prompt()
         s.logout()
     except pxssh.ExceptionPxssh as e:
         logger.error('pexpect error: %s', str(e))
     finally:
         call(['sed', '-i', '/{}.*/d'.format('\\.'.join(server_ip.split('.')))])
 
-    ctx.instance.runtime_properties[RPROP_UUID] = server.resourceUUID
-    ctx.instance.runtime_properties[RPROP_DISKS] = [d.resourceUUID for d in server.disks]
-    ctx.instance.runtime_properties[RPROP_NICS] = [n.resourceUUID for n in server.nics]
-    ctx.instance.runtime_properties[RPROP_IP] = server_ip
-    ctx.instance.runtime_properties[RPROP_USER] = server.initialUser
-    ctx.instance.runtime_properties[RPROP_PASS] = server.initialPassword
+    rp_[RPROP_UUID] = server.resourceUUID
+    rp_[RPROP_DISKS] = [d.resourceUUID for d in server.disks]
+    rp_[RPROP_NICS] = [n.resourceUUID for n in server.nics]
+    rp_[RPROP_IP] = server_ip
+    rp_[RPROP_USER] = server.initialUser
+    rp_[RPROP_PASS] = server.initialPassword
 
     ctx.logger.info('Server IP: ' + server_ip)
     ctx.logger.info('Server User: ' + server.initialUser)
     ctx.logger.info('Server Password: ' + server.initialPassword)
 
-    return server.resourceUUID, server_ip, server.initialUser, server.initialPassword
+    return server_uuid, server_ip, username, password
 
 
 @operation
 @with_fco_api
 def delete(fco_api, *args, **kwargs):
     server_uuid = ctx.instance.runtime_properties.get(RPROP_UUID)
-    job_uuid = delete_resource(fco_api, server_uuid, 'SERVER', True).resourceUUID
+    job_uuid = delete_resource(fco_api, server_uuid, 'SERVER', True) \
+        .resourceUUID
     if not wait_for_status(fco_api, job_uuid, 'SUCCESSFUL', 'JOB'):
         raise Exception('Failed to delete server')
 
