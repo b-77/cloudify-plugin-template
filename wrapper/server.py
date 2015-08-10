@@ -1,3 +1,7 @@
+# coding=UTF-8
+
+"""Server stuff."""
+
 from __future__ import print_function
 from fcoclient import clients
 from fcoclient import api
@@ -24,7 +28,7 @@ import socket
 import errno
 from cloudify import ctx
 from cloudify.decorators import operation
-from wrapper.common import with_fco_api
+from wrapper.helpers import with_fco_api
 
 PROP_IMAGE = 'image_uuid'
 PROP_NET_TYPE = 'net_type'
