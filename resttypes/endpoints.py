@@ -37,6 +37,7 @@ class Endpoint(Typed):
     RETURNS = {}
 
     def __init__(self, parameters=None, data=None, **kwargs):
+        """Initialise endpoint object."""
         super(Endpoint, self).__init__(self)
 
         # We can append underscores to avoid keyword conflicts
@@ -63,7 +64,8 @@ class Endpoint(Typed):
         self.endpoint = self.get_endpoint(parameters, data)
 
     @classmethod
-    def prepare_input(cls, parameters=None, data=None, *args, **kwargs):
+    def prepare_input(cls, parameters=None, data=None, **kwargs):
+        """Re-shuffle input data to split into parameters and payload data."""
         if parameters is None:
             parameters = {}
         if data is None:
@@ -92,6 +94,7 @@ class Endpoint(Typed):
 
     @classmethod
     def get_endpoint(cls, parameters=None, data=None):
+        """Create the URL based on an extremely smart algorithm."""
         valid_endpoints = []
         for endpoint in cls.ENDPOINTS:
             try:
@@ -127,6 +130,7 @@ class Endpoint(Typed):
 
     @classmethod
     def validate_return(cls, return_value):
+        """Verify that return data matches object specification."""
         return c_is_acceptable(return_value, cls.RETURNS.values()[0],
                                cls._noneable)
 
@@ -134,6 +138,7 @@ class Endpoint(Typed):
     # TODO: catch exceptions upstairs
     @classmethod
     def is_acceptable(cls, inst):
+        """Verify instance is acceptable input based on spec."""
         req = cls.REQUIRED_PARAMS | cls.REQUIRED_DATA
         opt = cls.OPTIONAL_PARAMS | cls.OPTIONAL_DATA
 
@@ -154,8 +159,9 @@ class Endpoint(Typed):
         return not req or cls._noneable
 
     def __str__(self):
+        """String representation of Endpoint object."""
         return str(self.endpoint[0]) + ' ' + self.endpoint[1] + ': ' + \
-                str(self._data)
+            str(self._data)
 
 
 class UpdateUser(Endpoint):
@@ -385,9 +391,8 @@ class AddIP(Endpoint):
             The scheduled Job object
     """
 
-    ENDPOINTS = [(Verbs.PUT,
-                 'resources/nic/{networkInterfaceUUID}/ip_address/{ipAddress}/'
-                  'add')]
+    ENDPOINTS = [(Verbs.PUT, 'resources/nic/{networkInterfaceUUID}/ip_address/'
+                 '{ipAddress}/add')]
 
     ALL_PARAMS = {'networkInterfaceUUID', 'ipAddress'}
     REQUIRED_PARAMS = {'networkInterfaceUUID', 'ipAddress'}
@@ -1781,9 +1786,8 @@ class ModifyPaymentMethodInstance(Endpoint):
             The scheduled Job object
     """
 
-    ENDPOINTS = [(Verbs.PUT,
-                 'resources/payment_method_instance/{updatedResource.resourceU'
-                  'UID}')]
+    ENDPOINTS = [(Verbs.PUT, 'resources/payment_method_instance/{updatedResour'
+                 'ce.resourceUUID}')]
 
     ALL_PARAMS = {'updatedResource.resourceUUID'}
     REQUIRED_PARAMS = {'updatedResource.resourceUUID'}
@@ -2118,9 +2122,8 @@ class AttachNetworkInterface(Endpoint):
             The scheduled Job object
     """
 
-    ENDPOINTS = [(Verbs.PUT,
-                 'resources/server/{serverUUID}/nic/{networkInterfaceUUID}/att'
-                  'ach')]
+    ENDPOINTS = [(Verbs.PUT, 'resources/server/{serverUUID}/nic/{networkInterf'
+                 'aceUUID}/attach')]
 
     ALL_PARAMS = {'serverUUID', 'networkInterfaceUUID'}
     REQUIRED_PARAMS = {'serverUUID', 'networkInterfaceUUID'}
@@ -3362,9 +3365,8 @@ class RemoveIP(Endpoint):
             The scheduled Job object
     """
 
-    ENDPOINTS = [(Verbs.PUT,
-                 'resources/nic/{networkInterfaceUUID}/ip_address/{ipAddress}/'
-                  'remove')]
+    ENDPOINTS = [(Verbs.PUT, 'resources/nic/{networkInterfaceUUID}/ip_address/'
+                 '{ipAddress}/remove')]
 
     ALL_PARAMS = {'networkInterfaceUUID', 'ipAddress'}
     REQUIRED_PARAMS = {'networkInterfaceUUID', 'ipAddress'}
@@ -3849,9 +3851,8 @@ class ChangeDeploymentInstanceStatus(Endpoint):
             The scheduled Job object
     """
 
-    ENDPOINTS = [(Verbs.PUT,
-                 'resources/deployment_instance/{deploymentInstanceUUID}/chang'
-                  'estatus')]
+    ENDPOINTS = [(Verbs.PUT, 'resources/deployment_instance/{deploymentInstanc'
+                 'eUUID}/changestatus')]
 
     ALL_PARAMS = {'deploymentInstanceUUID'}
     REQUIRED_PARAMS = {'deploymentInstanceUUID'}

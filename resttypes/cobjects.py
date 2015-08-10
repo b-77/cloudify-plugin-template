@@ -52,11 +52,13 @@ class ComplexObject(Typed):
             return self._data.get(attr)
 
     def __str__(self):
+        """Return string representation of Complext Object."""
         return '({}){}'.format(self.__class__.__name__, str(self._data))
 
     # TODO: catch exceptions upstairs
     @classmethod
     def is_acceptable(cls, inst):
+        """Check if given data is acceptable according to spec."""
         req = cls.REQUIRED_ATTRIBS.copy()
         opt = cls.OPTIONAL_ATTRIBS.copy()
         try:
@@ -74,6 +76,7 @@ class ComplexObject(Typed):
 
     @classmethod
     def construct_data(cls, inst):
+        """Take given data and initialise it to fit Complex Object spec."""
         inst = inst.copy()
         for k, v in inst.items():
             inst[k] = c_construct_data(v, cls.TYPES[k], cls._noneable)
@@ -90,7 +93,7 @@ class GenericContainer(ComplexObject):
     """
 
     def __getattr__(self, item):
-        """Returns the mapped value of the attribute requested or None.
+        """Return the mapped value of the attribute requested or None.
 
         If a GenericContainer object was explicitly instantiated with an
         unsupported type it will return that type for every attribute request,
@@ -197,31 +200,48 @@ class ResourceKey(ComplexObject):
              'resourceUUID': str, 'type': enums.ResourceKeyType}
 
 
-class PublishTo(ComplexObject):
+class StatementDetail(ComplexObject):
 
-    """FCO REST API PublishTo complex object.
+    """FCO REST API StatementDetail complex object.
 
     Name.
 
     Attributes (type name (required): description:
-        enums.ResourceType resourceType (T):
-            the type of the resource to whom publication is made
-        bool exclude (T):
-            the include/exclude tag name
-        str resourceName (T):
-            the name of the resource to whom publication is made
-        str resourceUUID (T):
-            the UUID of the resource to whom publication is made (either
-            a customer, or a billing entity, or NULL for the platform as
-            a whole)
+        float debitAmount (T):
+            The debit amount for the statement detail.
+        float balanceTodate (T):
+            The balance of the customer when the statement detail was
+            created.
+        int timestamp (T):
+            The date/time the statement detail was created.
+        float creditAmount (T):
+            The credit amount for the statement detail.
+        str customerUUID (T):
+            The UUID of the customer associated with the statement
+            detail.
+        float lastBalance (T):
+            The balance of the customer before the statement detail was
+            created.
+        enums.StatementType recordType (T):
+            The type of statement detail.
+        str reference (T):
+            The UUID of the invoice, transaction or credit note
+            associated with the statement detail.
+        str description (T):
+            The description of the statement detail.
     """
 
-    ALL_ATTRIBS = {'resourceType', 'exclude', 'resourceUUID', 'resourceName'}
-    REQUIRED_ATTRIBS = {'resourceType', 'exclude', 'resourceName',
-                        'resourceUUID'}
+    ALL_ATTRIBS = {'debitAmount', 'balanceTodate', 'timestamp', 'description',
+                   'creditAmount', 'customerUUID', 'lastBalance', 'reference',
+                   'recordType'}
+    REQUIRED_ATTRIBS = {'debitAmount', 'balanceTodate', 'timestamp',
+                        'creditAmount', 'customerUUID', 'lastBalance',
+                        'recordType', 'reference', 'description'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'resourceType': enums.ResourceType, 'exclude': bool,
-             'resourceName': str, 'resourceUUID': str}
+    TYPES = {'debitAmount': float, 'balanceTodate': float, 'timestamp': int,
+             'creditAmount': float, 'customerUUID': str, 'lastBalance': float,
+             'recordType': enums.StatementType, 'reference': str,
+             'description': str}
 
 
 class OrderedField(ComplexObject):
@@ -322,10 +342,10 @@ class ResourceMetadata(ComplexObject):
             The public metadata
         str systemMetadata (T):
             The system metadata
-        str restrictedMetadata (T):
-            The restricted metadata
         str privateMetadata (T):
             The private metadata
+        str restrictedMetadata (T):
+            The restricted metadata
     """
 
     ALL_ATTRIBS = {'resourceUUID', 'publicMetadata', 'systemMetadata',
@@ -368,15 +388,15 @@ class UnitTransactionSummary(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        datetime transactionDate (T):
-            The date associated with the transaction summary
+        float unitCredits (T):
+            The total credits within the summary period
         str customerName (F):
             The name of the customer associated with the transaction
             summary
         enums.ResourceType resourceType (T):
             The type of the resource
-        float unitCredits (T):
-            The total credits within the summary period
+        datetime transactionDate (T):
+            The date associated with the transaction summary
         float freeUnits (T):
             The total free units within the summary period
         str customerUUID (T):
@@ -387,17 +407,17 @@ class UnitTransactionSummary(ComplexObject):
             The total debits within the summary period
     """
 
-    ALL_ATTRIBS = {'unitCredits', 'customerName', 'resourceType',
-                   'transactionDate', 'freeUnits', 'customerUUID',
+    ALL_ATTRIBS = {'transactionDate', 'customerName', 'resourceType',
+                   'unitCredits', 'freeUnits', 'customerUUID',
                    'billingEntityUUID', 'unitDebits'}
-    REQUIRED_ATTRIBS = {'transactionDate', 'resourceType', 'unitCredits',
+    REQUIRED_ATTRIBS = {'unitCredits', 'resourceType', 'transactionDate',
                         'freeUnits', 'customerUUID', 'billingEntityUUID',
                         'unitDebits'}
     OPTIONAL_ATTRIBS = {'customerName'}
-    TYPES = {'transactionDate': datetime, 'customerName': str, 'resourceType':
-             enums.ResourceType, 'unitCredits': float, 'freeUnits': float,
-             'customerUUID': str, 'billingEntityUUID': str, 'unitDebits':
-             float}
+    TYPES = {'unitCredits': float, 'customerName': str, 'resourceType':
+             enums.ResourceType, 'transactionDate': datetime, 'freeUnits':
+             float, 'customerUUID': str, 'billingEntityUUID': str,
+             'unitDebits': float}
 
 
 class Address(ComplexObject):
@@ -451,22 +471,22 @@ class AuthenticationToken(ComplexObject):
         int renewalAmount (T):
             The amount of time, in seconds, that the token will
             automatically renew by
-        str creatorUserUUID (T):
-            The UUID of the User that created the authentication token.
         bool automaticRenewal (T):
             State if the token will be automatically renewed when used.
+        str creatorUserUUID (T):
+            The UUID of the User that created the authentication token.
     """
 
     ALL_ATTRIBS = {'publicToken', 'creatorCustomerUUID', 'expires',
                    'customerUUID', 'userUUID', 'renewalAmount',
-                   'automaticRenewal', 'creatorUserUUID'}
+                   'creatorUserUUID', 'automaticRenewal'}
     REQUIRED_ATTRIBS = {'publicToken', 'creatorCustomerUUID', 'expires',
                         'customerUUID', 'userUUID', 'renewalAmount',
-                        'creatorUserUUID', 'automaticRenewal'}
+                        'automaticRenewal', 'creatorUserUUID'}
     OPTIONAL_ATTRIBS = set()
     TYPES = {'publicToken': str, 'creatorCustomerUUID': str, 'expires': int,
              'customerUUID': str, 'userUUID': str, 'renewalAmount': int,
-             'creatorUserUUID': str, 'automaticRenewal': bool}
+             'automaticRenewal': bool, 'creatorUserUUID': str}
 
 
 class JadeList(ComplexObject):
@@ -503,48 +523,31 @@ class PseudoResource(ComplexObject):
     TYPES = {'resourceType': enums.ResourceType}
 
 
-class StatementDetail(ComplexObject):
+class PublishTo(ComplexObject):
 
-    """FCO REST API StatementDetail complex object.
+    """FCO REST API PublishTo complex object.
 
     Name.
 
     Attributes (type name (required): description:
-        float debitAmount (T):
-            The debit amount for the statement detail.
-        float balanceTodate (T):
-            The balance of the customer when the statement detail was
-            created.
-        int timestamp (T):
-            The date/time the statement detail was created.
-        str description (T):
-            The description of the statement detail.
-        float creditAmount (T):
-            The credit amount for the statement detail.
-        str customerUUID (T):
-            The UUID of the customer associated with the statement
-            detail.
-        float lastBalance (T):
-            The balance of the customer before the statement detail was
-            created.
-        str reference (T):
-            The UUID of the invoice, transaction or credit note
-            associated with the statement detail.
-        enums.StatementType recordType (T):
-            The type of statement detail.
+        enums.ResourceType resourceType (T):
+            the type of the resource to whom publication is made
+        bool exclude (T):
+            the include/exclude tag name
+        str resourceUUID (T):
+            the UUID of the resource to whom publication is made (either
+            a customer, or a billing entity, or NULL for the platform as
+            a whole)
+        str resourceName (T):
+            the name of the resource to whom publication is made
     """
 
-    ALL_ATTRIBS = {'debitAmount', 'balanceTodate', 'timestamp', 'creditAmount',
-                   'customerUUID', 'lastBalance', 'recordType', 'reference',
-                   'description'}
-    REQUIRED_ATTRIBS = {'debitAmount', 'balanceTodate', 'timestamp',
-                        'description', 'creditAmount', 'customerUUID',
-                        'lastBalance', 'reference', 'recordType'}
+    ALL_ATTRIBS = {'resourceType', 'exclude', 'resourceName', 'resourceUUID'}
+    REQUIRED_ATTRIBS = {'resourceType', 'exclude', 'resourceUUID',
+                        'resourceName'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'debitAmount': float, 'balanceTodate': float, 'timestamp': int,
-             'description': str, 'creditAmount': float, 'customerUUID': str,
-             'lastBalance': float, 'reference': str, 'recordType':
-             enums.StatementType}
+    TYPES = {'resourceType': enums.ResourceType, 'exclude': bool,
+             'resourceUUID': str, 'resourceName': str}
 
 
 class ExternalVm(ComplexObject):
@@ -597,14 +600,14 @@ class VncForwarderDetails(ComplexObject):
             The password for the node
         str protocol (T):
             VNC protocol
-        int sessionStartTime (T):
-            Session start time in milliseconds
-        str handler (T):
-            Handler type
-        str preconnectionBlob (T):
-            Pre connection data
         str sessionKey (T):
             Holds the autogenerated session key
+        int sessionStartTime (T):
+            Session start time in milliseconds
+        str preconnectionBlob (T):
+            Pre connection data
+        str handler (T):
+            Handler type
         int nodePort (T):
             VNC node port
         str nodeUsername (T):
@@ -620,17 +623,17 @@ class VncForwarderDetails(ComplexObject):
     """
 
     ALL_ATTRIBS = {'proxyPort', 'nodeDomain', 'nodePassword', 'protocol',
-                   'sessionKey', 'sessionStartTime', 'preconnectionBlob',
-                   'handler', 'nodePort', 'nodeUsername', 'nodeIp', 'serverId',
-                   'password', 'proxyIp'}
+                   'sessionStartTime', 'handler', 'preconnectionBlob',
+                   'sessionKey', 'nodePort', 'nodeUsername', 'nodeIp',
+                   'serverId', 'password', 'proxyIp'}
     REQUIRED_ATTRIBS = {'proxyPort', 'nodeDomain', 'nodePassword', 'protocol',
-                        'sessionStartTime', 'handler', 'preconnectionBlob',
-                        'sessionKey', 'nodePort', 'nodeUsername', 'nodeIp',
+                        'sessionKey', 'sessionStartTime', 'preconnectionBlob',
+                        'handler', 'nodePort', 'nodeUsername', 'nodeIp',
                         'serverId', 'password', 'proxyIp'}
     OPTIONAL_ATTRIBS = set()
     TYPES = {'proxyPort': int, 'nodeDomain': str, 'nodePassword': str,
-             'protocol': str, 'sessionStartTime': int, 'handler': str,
-             'preconnectionBlob': str, 'sessionKey': str, 'nodePort': int,
+             'protocol': str, 'sessionKey': str, 'sessionStartTime': int,
+             'preconnectionBlob': str, 'handler': str, 'nodePort': int,
              'nodeUsername': str, 'nodeIp': str, 'serverId': int, 'password':
              str, 'proxyIp': str}
 
@@ -676,24 +679,24 @@ class TransactionLog(ComplexObject):
             The date at which the transaction was last modified
         str request (T):
             The payment request as used by the payment processing module
-        int id (F):
-            The numeric order ID
+        str response (T):
+            The payment response as used by the payment processing
+            module
         str customerUUID (T):
             The UUID of customer to which the transaction relates
         str billingEntityUUID (F):
             The UUID of billing entity to which the transaction relates
-        str response (T):
-            The payment response as used by the payment processing
-            module
+        int id (F):
+            The numeric order ID
     """
 
-    ALL_ATTRIBS = {'reference', 'lastModified', 'request', 'response',
-                   'customerUUID', 'billingEntityUUID', 'id'}
-    REQUIRED_ATTRIBS = {'request', 'response', 'reference', 'customerUUID'}
+    ALL_ATTRIBS = {'reference', 'lastModified', 'request', 'id',
+                   'customerUUID', 'billingEntityUUID', 'response'}
+    REQUIRED_ATTRIBS = {'request', 'customerUUID', 'reference', 'response'}
     OPTIONAL_ATTRIBS = {'lastModified', 'billingEntityUUID', 'id'}
-    TYPES = {'reference': str, 'lastModified': datetime, 'request': str, 'id':
-             int, 'customerUUID': str, 'billingEntityUUID': str, 'response':
-             str}
+    TYPES = {'reference': str, 'lastModified': datetime, 'request': str,
+             'response': str, 'customerUUID': str, 'billingEntityUUID': str,
+             'id': int}
 
 
 class ImagePermission(ComplexObject):
@@ -755,16 +758,16 @@ class FilterCondition(ComplexObject):
     Attributes (type name (required): description:
         str field (T):
             The field the filter condition must match
-        enums.Condition condition (T):
-            The filter condition (defaults to IS_EQUAL_TO)
         List(str) value (T):
             The value or values the filter condition must match
+        enums.Condition condition (T):
+            The filter condition (defaults to IS_EQUAL_TO)
     """
 
-    ALL_ATTRIBS = {'field', 'value', 'condition'}
-    REQUIRED_ATTRIBS = {'field', 'condition', 'value'}
+    ALL_ATTRIBS = {'field', 'condition', 'value'}
+    REQUIRED_ATTRIBS = {'field', 'value', 'condition'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'field': str, 'condition': enums.Condition, 'value': List(str)}
+    TYPES = {'field': str, 'value': List(str), 'condition': enums.Condition}
 
 
 class CallbackParams(ComplexObject):
@@ -1044,16 +1047,16 @@ class HypervisorSetting(ComplexObject):
     Attributes (type name (required): description:
         bool locked (T):
             State if the setting is locked
-        str key (T):
-            The key use for the setting
         str value (T):
             The value used for the setting
+        str key (T):
+            The key use for the setting
     """
 
-    ALL_ATTRIBS = {'locked', 'value', 'key'}
-    REQUIRED_ATTRIBS = {'locked', 'key', 'value'}
+    ALL_ATTRIBS = {'locked', 'key', 'value'}
+    REQUIRED_ATTRIBS = {'locked', 'value', 'key'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'locked': bool, 'key': str, 'value': str}
+    TYPES = {'locked': bool, 'value': str, 'key': str}
 
 
 class SystemCapabilitySet(ComplexObject):
@@ -1073,46 +1076,47 @@ class SystemCapabilitySet(ComplexObject):
             Bentobox capability
         enums.Branding branding (T):
             Branding capability
-        List(enums.Signup) signup (T):
-            Signup system capability
+        List(enums.Payment) payment (T):
+            Payment system capability
         Dict(str, int) clusterHypervisor (T):
             Cluster hypervisor limits capability
         List(enums.Publish) publish (T):
             Image publication system capability
         enums.Email email (T):
             Email capability
-        List(enums.EmulatedDevices) emulatedDevices (T):
-            Disabling emulated device capability
         List(enums.Snapshotting) snapshotting (T):
             Snapshotting system capability
         List(enums.Cloning) cloning (T):
             Cloning system capability
         Dict(enums.MaxLimit, int) maxLimit (T):
             System limits capability
+        List(enums.Signup) signup (T):
+            Signup system capability
         List(enums.Vnc) vnc (T):
             VNC handler capability
-        List(enums.Payment) payment (T):
-            Payment system capability
+        List(enums.EmulatedDevices) emulatedDevices (T):
+            Disabling emulated device capability
     """
 
     ALL_ATTRIBS = {'networking', 'invoicing', 'multitierStorage', 'bentoBox',
                    'branding', 'signup', 'clusterHypervisor', 'publish',
-                   'emulatedDevices', 'snapshotting', 'cloning', 'payment',
-                   'maxLimit', 'vnc', 'email'}
+                   'email', 'emulatedDevices', 'snapshotting', 'cloning',
+                   'maxLimit', 'vnc', 'payment'}
     REQUIRED_ATTRIBS = {'networking', 'invoicing', 'multitierStorage',
                         'bentoBox', 'branding', 'signup', 'clusterHypervisor',
-                        'publish', 'payment', 'email', 'snapshotting',
-                        'cloning', 'maxLimit', 'vnc', 'emulatedDevices'}
+                        'publish', 'emulatedDevices', 'snapshotting',
+                        'cloning', 'payment', 'maxLimit', 'vnc', 'email'}
     OPTIONAL_ATTRIBS = set()
     TYPES = {'networking': List(enums.Networking), 'invoicing':
              enums.Invoicing, 'multitierStorage': enums.MultitierStorage,
              'bentoBox': enums.BentoBox, 'branding': enums.Branding, 'signup':
              List(enums.Signup), 'clusterHypervisor': Dict(str, int),
-             'publish': List(enums.Publish), 'payment': List(enums.Payment),
-             'email': enums.Email, 'snapshotting': List(enums.Snapshotting),
-             'cloning': List(enums.Cloning), 'maxLimit':
-             Dict(enums.MaxLimit, int), 'vnc': List(enums.Vnc),
-             'emulatedDevices': List(enums.EmulatedDevices)}
+             'publish': List(enums.Publish), 'emulatedDevices':
+             List(enums.EmulatedDevices), 'snapshotting':
+             List(enums.Snapshotting), 'cloning': List(enums.Cloning),
+             'payment': List(enums.Payment), 'maxLimit':
+             Dict(enums.MaxLimit, int), 'vnc': List(enums.Vnc), 'email':
+             enums.Email}
 
 
 class EmailBlock(ComplexObject):
@@ -1191,17 +1195,17 @@ class VNCConnection(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
+        str vncPassword (T):
+            The VNC password associated with this connection
         str serverName (T):
             The server name associated with this connection to display
             in the VNC window
-        str vncPassword (T):
-            The VNC password associated with this connection
+        enums.VNCHandler vncHandler (T):
+            The handler type
         str webSocketPath (T):
             The websocket URL to use to connect
         str vncToken (T):
             The one-time token associated with this connection
-        enums.VNCHandler vncHandler (T):
-            The handler type
     """
 
     ALL_ATTRIBS = {'serverName', 'vncPassword', 'webSocketPath', 'vncToken',
@@ -1255,14 +1259,14 @@ class Subnet(ComplexObject):
         str deploymentInstanceName (F):
             The name of the deployment instance the resource is created
             from
-        int sortOrder (T):
-            The sort order value for the given resource
+        str customerUUID (F):
+            The UUID of the customer that owns the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
         str billingEntityUUID (F):
             The UUID of the Billing Entity to which the resource belongs
-        str customerUUID (F):
-            The UUID of the customer that owns the resource
+        int sortOrder (T):
+            The sort order value for the given resource
         str defaultGatewayAddress (F):
             The default gateway
         str clusterName (F):
@@ -1299,12 +1303,13 @@ class Subnet(ComplexObject):
                    'broadcastAddress', 'vdcUUID', 'productOfferUUID',
                    'resourceName', 'resourceCreateDate', 'productOfferName',
                    'clusterUUID', 'systemAllocated', 'networkUUID',
-                   'deploymentInstanceName', 'customerUUID', 'resourceUUID',
-                   'billingEntityUUID', 'sortOrder', 'defaultGatewayAddress',
-                   'clusterName', 'vdcName', 'subnetType', 'networkType',
-                   'lastModifiedTime', 'networkName', 'networkAddress',
-                   'resourceType', 'resourceKey', 'mask',
-                   'deploymentInstanceUUID', 'useableIps'}
+                   'deploymentInstanceName', 'sortOrder', 'resourceUUID',
+                   'billingEntityUUID', 'customerUUID',
+                   'defaultGatewayAddress', 'clusterName', 'vdcName',
+                   'subnetType', 'networkType', 'lastModifiedTime',
+                   'networkName', 'networkAddress', 'resourceType',
+                   'resourceKey', 'mask', 'deploymentInstanceUUID',
+                   'useableIps'}
     REQUIRED_ATTRIBS = {'clusterUUID', 'networkUUID', 'resourceType',
                         'sortOrder', 'vdcUUID', 'resourceName'}
     OPTIONAL_ATTRIBS = {'firstUsableAddress', 'customerName', 'providers',
@@ -1325,12 +1330,12 @@ class Subnet(ComplexObject):
              'resourceName': str, 'resourceCreateDate': datetime,
              'productOfferName': str, 'clusterUUID': str, 'systemAllocated':
              bool, 'networkUUID': str, 'deploymentInstanceName': str,
-             'sortOrder': int, 'resourceUUID': str, 'billingEntityUUID': str,
-             'customerUUID': str, 'defaultGatewayAddress': str, 'clusterName':
-             str, 'vdcName': str, 'subnetType': enums.IPType, 'networkType':
-             enums.NetworkType, 'lastModifiedTime': int, 'networkName': str,
-             'networkAddress': str, 'resourceType': enums.ResourceType,
-             'resourceKey': List(ResourceKey), 'mask': int,
+             'customerUUID': str, 'resourceUUID': str, 'billingEntityUUID':
+             str, 'sortOrder': int, 'defaultGatewayAddress': str,
+             'clusterName': str, 'vdcName': str, 'subnetType': enums.IPType,
+             'networkType': enums.NetworkType, 'lastModifiedTime': int,
+             'networkName': str, 'networkAddress': str, 'resourceType':
+             enums.ResourceType, 'resourceKey': List(ResourceKey), 'mask': int,
              'deploymentInstanceUUID': str, 'useableIps': List(str)}
 
 
@@ -1708,10 +1713,10 @@ class StorageGroup(ComplexObject):
             The type of the resource
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         bool isDefaultGroup (T):
             State if this is the default storage group
         str billingEntityUUID (F):
@@ -1726,7 +1731,7 @@ class StorageGroup(ComplexObject):
     ALL_ATTRIBS = {'isLocalGroup', 'providers', 'isImageGroup', 'resourceKey',
                    'resourceMetadata', 'billingEntityName', 'resourceState',
                    'hasStorageUnit', 'resourceType', 'sortOrder',
-                   'resourceUUID', 'resourceName', 'isDefaultGroup',
+                   'resourceName', 'resourceUUID', 'isDefaultGroup',
                    'billingEntityUUID', 'lastModifiedTime',
                    'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'isLocalGroup', 'isImageGroup', 'hasStorageUnit',
@@ -1741,7 +1746,7 @@ class StorageGroup(ComplexObject):
              'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
              'resourceState': enums.ResourceState, 'hasStorageUnit': bool,
              'resourceType': enums.ResourceType, 'sortOrder': int,
-             'resourceName': str, 'resourceUUID': str, 'isDefaultGroup': bool,
+             'resourceUUID': str, 'resourceName': str, 'isDefaultGroup': bool,
              'billingEntityUUID': str, 'lastModifiedTime': int,
              'resourceCreateDate': datetime}
 
@@ -1753,8 +1758,8 @@ class Blob(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        str value (T):
-            The value of the resource to which the blob relates
+        int sortOrder (T):
+            The sort order value for the given resource
         str customerName (F):
             The name of the customer that owns the resource
         Dict(str, Dict(str, str)) providers (F):
@@ -1769,15 +1774,14 @@ class Blob(ComplexObject):
             The Name of the Billing Entity to which the resource belongs
         enums.ResourceState resourceState (F):
             The state of the resource
-        int sortOrder (T):
-            The sort order value for the given resource
-        bool publicResource (F):
-            State if the Blob is a public resource, and availabel to the
-            Open API services
-        str resourceName (T):
-            The name of the resource
+        str value (T):
+            The value of the resource to which the blob relates
+        str customerUUID (F):
+            The UUID of the customer that owns the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -1787,29 +1791,31 @@ class Blob(ComplexObject):
             The UUID of the Billing Entity to which the resource belongs
         datetime resourceCreateDate (F):
             The creation date of the resource
-        str customerUUID (F):
-            The UUID of the customer that owns the resource
+        bool publicResource (F):
+            State if the Blob is a public resource, and availabel to the
+            Open API services
     """
 
-    ALL_ATTRIBS = {'customerName', 'providers', 'resourceType', 'customerUUID',
+    ALL_ATTRIBS = {'value', 'customerName', 'providers', 'resourceType',
                    'resourceKey', 'resourceMetadata', 'billingEntityName',
-                   'value', 'resourceUUID', 'resourceState', 'publicResource',
-                   'resourceName', 'lastModifiedTime', 'sha256',
-                   'billingEntityUUID', 'resourceCreateDate', 'sortOrder'}
+                   'resourceState', 'sortOrder', 'publicResource',
+                   'resourceName', 'resourceUUID', 'lastModifiedTime',
+                   'sha256', 'billingEntityUUID', 'resourceCreateDate',
+                   'customerUUID'}
     REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'sortOrder', 'value'}
     OPTIONAL_ATTRIBS = {'customerName', 'providers', 'resourceKey',
                         'resourceMetadata', 'billingEntityName',
                         'resourceState', 'customerUUID', 'resourceUUID',
                         'lastModifiedTime', 'sha256', 'billingEntityUUID',
                         'resourceCreateDate', 'publicResource'}
-    TYPES = {'sortOrder': int, 'customerName': str, 'providers':
-             Dict(str, Dict(str, str)), 'resourceType': enums.ResourceType,
+    TYPES = {'customerName': str, 'providers': Dict(str, Dict(str, str)),
+             'resourceType': enums.ResourceType, 'customerUUID': str,
              'resourceKey': List(ResourceKey), 'resourceMetadata':
              ResourceMetadata, 'billingEntityName': str, 'value': str,
-             'customerUUID': str, 'resourceName': str, 'resourceUUID': str,
-             'lastModifiedTime': int, 'sha256': str, 'billingEntityUUID': str,
-             'resourceState': enums.ResourceState, 'resourceCreateDate':
-             datetime, 'publicResource': bool}
+             'resourceUUID': str, 'resourceState': enums.ResourceState,
+             'publicResource': bool, 'resourceName': str, 'lastModifiedTime':
+             int, 'sha256': str, 'billingEntityUUID': str,
+             'resourceCreateDate': datetime, 'sortOrder': int}
 
 
 class QueryResult(ComplexObject):
@@ -1848,17 +1854,21 @@ class TriggerMethod(ComplexObject):
     Attributes (type name (required): description:
         enums.TriggerType fdlTriggerType (T):
             The type of trigger this trigger method represents.
+        ResourceMetadata resourceMetadata (F):
+            The metadata attached to the resource
+        str resourceUUID (F):
+            The UUID of the resource (read-only)
         Dict(str, Dict(str, str)) providers (F):
             The config provider values
         enums.ResourceType resourceType (T):
             The type of the resource
-        str billingEntityUUID (F):
-            The UUID of the Billing Entity to which the resource belongs
+        str fdlName (T):
+            The name of the FDL Code Block that contains the function
         str fdlDescription (T):
             Longform description of the trigger method, populated by the
             FDL code block.
-        ResourceMetadata resourceMetadata (F):
-            The metadata attached to the resource
+        List(ResourceKey) resourceKey (F):
+            The keys attached to the resource
         str billingEntityName (F):
             The Name of the Billing Entity to which the resource belongs
         List(str) fdlTriggerOptions (T):
@@ -1869,17 +1879,12 @@ class TriggerMethod(ComplexObject):
             objects would invoke the trigger method.
         enums.ResourceState resourceState (F):
             The state of the resource
-        int instanceKey (T):
-            A field used by scheduled triggers to manage multiple jade
-            instances.
         str fdlUUID (T):
             UUID of the FDL code block to which the trigger method is
             linked.
         int fdlPriority (T):
             Order in which the trigger method will be executed. Triggers
             are called in ascending order of priority.
-        str resourceName (T):
-            The name of the resource
         int sortOrder (T):
             The sort order value for the given resource
         int scheduledRepeatFrequency (T):
@@ -1888,26 +1893,27 @@ class TriggerMethod(ComplexObject):
         int nextScheduledInvoke (T):
             The next scheduled invoke of this trigger method. Only valid
             for a SCHEDULED TriggerType TriggerMethod
-        str resourceUUID (F):
-            The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
-        str fdlName (T):
-            The name of the FDL Code Block that contains the function
-        List(ResourceKey) resourceKey (F):
-            The keys attached to the resource
+        str billingEntityUUID (F):
+            The UUID of the Billing Entity to which the resource belongs
+        int instanceKey (T):
+            A field used by scheduled triggers to manage multiple jade
+            instances.
         datetime resourceCreateDate (F):
             The creation date of the resource
     """
 
-    ALL_ATTRIBS = {'fdlTriggerType', 'resourceKey', 'resourceUUID',
-                   'providers', 'resourceType', 'fdlName', 'fdlDescription',
-                   'resourceMetadata', 'billingEntityName',
-                   'fdlTriggerOptions', 'resourceState', 'fdlUUID',
-                   'fdlPriority', 'sortOrder', 'scheduledRepeatFrequency',
-                   'nextScheduledInvoke', 'resourceName', 'lastModifiedTime',
-                   'billingEntityUUID', 'instanceKey', 'resourceCreateDate'}
+    ALL_ATTRIBS = {'fdlTriggerType', 'providers', 'resourceType',
+                   'billingEntityUUID', 'fdlDescription', 'resourceMetadata',
+                   'billingEntityName', 'fdlTriggerOptions', 'resourceState',
+                   'instanceKey', 'fdlUUID', 'fdlPriority', 'resourceName',
+                   'sortOrder', 'scheduledRepeatFrequency',
+                   'nextScheduledInvoke', 'resourceUUID', 'lastModifiedTime',
+                   'fdlName', 'resourceKey', 'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'fdlTriggerType', 'resourceType', 'fdlDescription',
                         'fdlTriggerOptions', 'fdlUUID', 'fdlPriority',
                         'sortOrder', 'scheduledRepeatFrequency',
@@ -1917,16 +1923,16 @@ class TriggerMethod(ComplexObject):
                         'billingEntityName', 'resourceState', 'resourceUUID',
                         'lastModifiedTime', 'billingEntityUUID',
                         'resourceCreateDate'}
-    TYPES = {'fdlTriggerType': enums.TriggerType, 'providers':
+    TYPES = {'fdlTriggerType': enums.TriggerType, 'resourceKey':
+             List(ResourceKey), 'resourceUUID': str, 'providers':
              Dict(str, Dict(str, str)), 'resourceType': enums.ResourceType,
-             'billingEntityUUID': str, 'resourceKey': List(ResourceKey),
-             'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
-             'fdlTriggerOptions': List(str), 'resourceState':
-             enums.ResourceState, 'instanceKey': int, 'fdlUUID': str,
-             'fdlPriority': int, 'resourceName': str, 'sortOrder': int,
-             'scheduledRepeatFrequency': int, 'nextScheduledInvoke': int,
-             'resourceUUID': str, 'lastModifiedTime': int, 'fdlName': str,
-             'fdlDescription': str, 'resourceCreateDate': datetime}
+             'fdlName': str, 'fdlDescription': str, 'resourceMetadata':
+             ResourceMetadata, 'billingEntityName': str, 'fdlTriggerOptions':
+             List(str), 'resourceState': enums.ResourceState, 'fdlUUID': str,
+             'fdlPriority': int, 'sortOrder': int, 'scheduledRepeatFrequency':
+             int, 'nextScheduledInvoke': int, 'resourceName': str,
+             'lastModifiedTime': int, 'billingEntityUUID': str, 'instanceKey':
+             int, 'resourceCreateDate': datetime}
 
 
 class MapHolder(ComplexObject):
@@ -2107,10 +2113,10 @@ class ExportedFunction(ComplexObject):
             The FDL function that is to be invoked
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -2125,7 +2131,7 @@ class ExportedFunction(ComplexObject):
     ALL_ATTRIBS = {'providers', 'resourceType', 'fdlReference',
                    'fdlDescription', 'resourceMetadata', 'billingEntityName',
                    'resourceState', 'fdlUUID', 'fdlFunction', 'sortOrder',
-                   'resourceUUID', 'resourceName', 'lastModifiedTime',
+                   'resourceName', 'resourceUUID', 'lastModifiedTime',
                    'billingEntityUUID', 'resourceKey', 'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'resourceType', 'fdlReference', 'fdlDescription',
                         'fdlUUID', 'fdlFunction', 'sortOrder', 'resourceName'}
@@ -2137,8 +2143,8 @@ class ExportedFunction(ComplexObject):
              enums.ResourceType, 'fdlReference': str, 'fdlDescription': str,
              'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
              'resourceState': enums.ResourceState, 'fdlUUID': str,
-             'fdlFunction': str, 'sortOrder': int, 'resourceName': str,
-             'resourceUUID': str, 'lastModifiedTime': int, 'billingEntityUUID':
+             'fdlFunction': str, 'sortOrder': int, 'resourceUUID': str,
+             'resourceName': str, 'lastModifiedTime': int, 'billingEntityUUID':
              str, 'resourceKey': List(ResourceKey), 'resourceCreateDate':
              datetime}
 
@@ -2150,8 +2156,8 @@ class Job(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        bool scheduled (T):
-            Whether the job is scheduled to run at a future date
+        enums.JobStatus status (T):
+            The current status of the job
         str customerName (F):
             The name of the customer that owns the resource
         Dict(str, Dict(str, str)) providers (F):
@@ -2169,12 +2175,12 @@ class Job(ComplexObject):
         str deploymentInstanceUUID (F):
             The uuid of the deployment instance the resource is created
             from
-        str vdcUUID (T):
-            The UUID of the VDC in which the resource is contained
-        str productOfferUUID (F):
-            The UUID of the product offer associated with the resource
         str resourceName (T):
             The name of the resource
+        str productOfferUUID (F):
+            The UUID of the product offer associated with the resource
+        datetime resourceCreateDate (F):
+            The creation date of the resource
         str parentJobUUID (T):
             The UUID of the parent job
         enums.JobType jobType (T):
@@ -2200,25 +2206,25 @@ class Job(ComplexObject):
             The UUID of the Billing Entity to which the resource belongs
         int sortOrder (T):
             The sort order value for the given resource
-        enums.JobStatus status (T):
-            The current status of the job
-        str info (T):
-            Information concerning the job
+        bool scheduled (T):
+            Whether the job is scheduled to run at a future date
+        str userName (T):
+            The name of the user that created the job
         str clusterName (F):
             The name of the cluster in which the resource is located
-        datetime resourceCreateDate (F):
-            The creation date of the resource
-        str vdcName (F):
-            The name of the VDC in which the resource is contained
         str itemDescription (T):
             The description of the item
+        str vdcName (F):
+            The name of the VDC in which the resource is contained
         datetime startTime (T):
             The start time of the job
+        str vdcUUID (T):
+            The UUID of the VDC in which the resource is contained
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
-        str userName (T):
-            The name of the user that created the job
+        str info (T):
+            Information concerning the job
         enums.ResourceType resourceType (T):
             The type of the resource
         List(ResourceKey) resourceKey (F):
@@ -2231,18 +2237,18 @@ class Job(ComplexObject):
             The name of the job item
     """
 
-    ALL_ATTRIBS = {'status', 'customerName', 'providers', 'resourceMetadata',
-                   'billingEntityName', 'resourceState', 'errorCode',
-                   'deploymentInstanceUUID', 'vdcUUID', 'productOfferUUID',
-                   'resourceName', 'parentJobUUID', 'jobType', 'itemType',
-                   'productOfferName', 'clusterUUID', 'extendedType',
-                   'deploymentInstanceName', 'itemUUID', 'customerUUID',
-                   'resourceUUID', 'billingEntityUUID', 'sortOrder',
-                   'scheduled', 'userName', 'clusterName',
+    ALL_ATTRIBS = {'scheduled', 'customerName', 'providers',
+                   'resourceMetadata', 'billingEntityName', 'resourceState',
+                   'errorCode', 'deploymentInstanceUUID', 'vdcUUID',
+                   'productOfferUUID', 'resourceName', 'parentJobUUID',
+                   'jobType', 'itemType', 'productOfferName', 'clusterUUID',
+                   'extendedType', 'deploymentInstanceName', 'itemUUID',
+                   'customerUUID', 'resourceUUID', 'billingEntityUUID',
+                   'sortOrder', 'status', 'info', 'clusterName',
                    'resourceCreateDate', 'vdcName', 'itemDescription',
-                   'startTime', 'lastModifiedTime', 'info', 'resourceType',
+                   'startTime', 'lastModifiedTime', 'userName', 'resourceType',
                    'resourceKey', 'userUUID', 'endTime', 'itemName'}
-    REQUIRED_ATTRIBS = {'status', 'scheduled', 'clusterUUID', 'itemType',
+    REQUIRED_ATTRIBS = {'scheduled', 'status', 'clusterUUID', 'itemType',
                         'resourceType', 'userName', 'itemDescription',
                         'extendedType', 'errorCode', 'info', 'itemUUID',
                         'sortOrder', 'startTime', 'vdcUUID', 'userUUID',
@@ -2255,7 +2261,7 @@ class Job(ComplexObject):
                         'resourceUUID', 'productOfferUUID',
                         'deploymentInstanceName', 'lastModifiedTime',
                         'billingEntityUUID', 'resourceCreateDate'}
-    TYPES = {'scheduled': bool, 'customerName': str, 'providers':
+    TYPES = {'status': enums.JobStatus, 'customerName': str, 'providers':
              Dict(str, Dict(str, str)), 'resourceMetadata': ResourceMetadata,
              'billingEntityName': str, 'resourceState': enums.ResourceState,
              'errorCode': str, 'deploymentInstanceUUID': str, 'vdcUUID': str,
@@ -2264,10 +2270,10 @@ class Job(ComplexObject):
              'productOfferName': str, 'clusterUUID': str, 'extendedType': str,
              'deploymentInstanceName': str, 'itemUUID': str, 'customerUUID':
              str, 'resourceUUID': str, 'billingEntityUUID': str, 'sortOrder':
-             int, 'status': enums.JobStatus, 'info': str, 'clusterName': str,
+             int, 'scheduled': bool, 'userName': str, 'clusterName': str,
              'resourceCreateDate': datetime, 'vdcName': str, 'itemDescription':
-             str, 'startTime': datetime, 'lastModifiedTime': int, 'userName':
-             str, 'resourceType': enums.ResourceType, 'resourceKey':
+             str, 'startTime': datetime, 'lastModifiedTime': int, 'info': str,
+             'resourceType': enums.ResourceType, 'resourceKey':
              List(ResourceKey), 'userUUID': str, 'endTime': datetime,
              'itemName': str}
 
@@ -2279,6 +2285,8 @@ class Translation(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
+        ResourceMetadata resourceMetadata (F):
+            The metadata attached to the resource
         str valuesHash (T):
             The value of the hashed TranslationItem list
         str parentTranslationUUID (T):
@@ -2289,59 +2297,56 @@ class Translation(ComplexObject):
             The config provider values
         enums.ResourceType resourceType (T):
             The type of the resource
-        bool editable (T):
-            State if the Translation is editable.
-        str region (F):
-            The region code associated with the translation
-        ResourceMetadata resourceMetadata (F):
-            The metadata attached to the resource
         str billingEntityName (F):
             The Name of the Billing Entity to which the resource belongs
+        str region (F):
+            The region code associated with the translation
+        List(ResourceKey) resourceKey (F):
+            The keys attached to the resource
+        bool editable (T):
+            State if the Translation is editable.
         enums.ResourceState resourceState (F):
             The state of the resource
-        str parentTranslationName (T):
-            The name of the parent translation.
         Dict(str, str) values (T):
             The un-compiled translation values
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
         str billingEntityUUID (F):
             The UUID of the Billing Entity to which the resource belongs
-        List(ResourceKey) resourceKey (F):
-            The keys attached to the resource
+        str parentTranslationName (T):
+            The name of the parent translation.
         datetime resourceCreateDate (F):
             The creation date of the resource
     """
 
-    ALL_ATTRIBS = {'resourceKey', 'valuesHash', 'parentTranslationUUID',
-                   'language', 'providers', 'resourceType',
-                   'billingEntityName', 'region', 'resourceMetadata',
-                   'editable', 'resourceState', 'values', 'sortOrder',
-                   'resourceUUID', 'resourceName', 'lastModifiedTime',
-                   'billingEntityUUID', 'parentTranslationName',
-                   'resourceCreateDate'}
+    ALL_ATTRIBS = {'valuesHash', 'parentTranslationUUID', 'language',
+                   'providers', 'resourceType', 'editable', 'region',
+                   'resourceMetadata', 'billingEntityName', 'resourceState',
+                   'parentTranslationName', 'values', 'sortOrder',
+                   'resourceName', 'resourceUUID', 'lastModifiedTime',
+                   'billingEntityUUID', 'resourceKey', 'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'valuesHash', 'parentTranslationUUID', 'language',
                         'resourceType', 'editable', 'values', 'sortOrder',
                         'resourceName', 'parentTranslationName'}
-    OPTIONAL_ATTRIBS = {'providers', 'resourceKey', 'resourceMetadata',
+    OPTIONAL_ATTRIBS = {'providers', 'region', 'resourceMetadata',
                         'billingEntityName', 'resourceState', 'resourceUUID',
-                        'lastModifiedTime', 'billingEntityUUID', 'region',
+                        'lastModifiedTime', 'billingEntityUUID', 'resourceKey',
                         'resourceCreateDate'}
-    TYPES = {'valuesHash': str, 'parentTranslationUUID': str, 'language': str,
-             'providers': Dict(str, Dict(str, str)), 'resourceType':
-             enums.ResourceType, 'editable': bool, 'resourceKey':
-             List(ResourceKey), 'resourceMetadata': ResourceMetadata,
-             'billingEntityName': str, 'resourceState': enums.ResourceState,
-             'parentTranslationName': str, 'values': Dict(str, str),
-             'sortOrder': int, 'resourceName': str, 'resourceUUID': str,
-             'lastModifiedTime': int, 'billingEntityUUID': str, 'region': str,
+    TYPES = {'resourceKey': List(ResourceKey), 'valuesHash': str,
+             'parentTranslationUUID': str, 'language': str, 'providers':
+             Dict(str, Dict(str, str)), 'resourceType': enums.ResourceType,
+             'billingEntityName': str, 'region': str, 'resourceMetadata':
+             ResourceMetadata, 'editable': bool, 'resourceState':
+             enums.ResourceState, 'values': Dict(str, str), 'sortOrder': int,
+             'resourceUUID': str, 'resourceName': str, 'lastModifiedTime': int,
+             'billingEntityUUID': str, 'parentTranslationName': str,
              'resourceCreateDate': datetime}
 
 
@@ -2378,14 +2383,14 @@ class UserDetails(ComplexObject):
             The organisation name associated with the user / contact
         int sortOrder (T):
             The sort order value for the given resource
-        datetime lastLoginTime (F):
-            The last login time associated with the user / contact
+        str resourceUUID (F):
+            The UUID of the resource (read-only)
         str billingEntityUUID (F):
             The UUID of the Billing Entity to which the resource belongs
         str email (T):
             The email address associated with the user / contact
-        str resourceUUID (F):
-            The UUID of the resource (read-only)
+        datetime lastLoginTime (F):
+            The last login time associated with the user / contact
         Address address (F):
             The address details associated with the user / contact
         int lastModifiedTime (F):
@@ -2409,8 +2414,8 @@ class UserDetails(ComplexObject):
                    'billingEntityName', 'resourceState', 'faxNumber',
                    'userType', 'resourceName', 'resourceCreateDate',
                    'eveningNumber', 'organisation', 'sortOrder',
-                   'resourceUUID', 'billingEntityUUID', 'email',
-                   'lastLoginTime', 'address', 'lastModifiedTime',
+                   'lastLoginTime', 'billingEntityUUID', 'email',
+                   'resourceUUID', 'address', 'lastModifiedTime',
                    'mobileNumber', 'firstName', 'admin', 'lastName',
                    'resourceKey', 'resourceType'}
     REQUIRED_ATTRIBS = {'admin', 'resourceName', 'resourceType', 'sortOrder',
@@ -2419,7 +2424,7 @@ class UserDetails(ComplexObject):
                         'firstName', 'providers', 'lastName', 'organisation',
                         'resourceMetadata', 'billingEntityName',
                         'resourceState', 'faxNumber', 'userType', 'address',
-                        'lastLoginTime', 'resourceUUID', 'lastModifiedTime',
+                        'resourceUUID', 'lastLoginTime', 'lastModifiedTime',
                         'billingEntityUUID', 'resourceKey',
                         'resourceCreateDate'}
     TYPES = {'dayTimeNumber': str, 'providers': Dict(str, Dict(str, str)),
@@ -2427,8 +2432,8 @@ class UserDetails(ComplexObject):
              'resourceState': enums.ResourceState, 'faxNumber': str,
              'userType': enums.UserType, 'resourceName': str,
              'resourceCreateDate': datetime, 'eveningNumber': str,
-             'organisation': str, 'sortOrder': int, 'lastLoginTime': datetime,
-             'billingEntityUUID': str, 'email': str, 'resourceUUID': str,
+             'organisation': str, 'sortOrder': int, 'resourceUUID': str,
+             'billingEntityUUID': str, 'email': str, 'lastLoginTime': datetime,
              'address': Address, 'lastModifiedTime': int, 'mobileNumber': str,
              'firstName': str, 'admin': bool, 'lastName': str, 'resourceKey':
              List(ResourceKey), 'resourceType': enums.ResourceType}
@@ -2578,10 +2583,10 @@ class Resource(ComplexObject):
             The state of the resource
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -2593,7 +2598,7 @@ class Resource(ComplexObject):
 
     ALL_ATTRIBS = {'providers', 'resourceType', 'resourceKey',
                    'resourceMetadata', 'billingEntityName', 'resourceState',
-                   'sortOrder', 'resourceUUID', 'resourceName',
+                   'sortOrder', 'resourceName', 'resourceUUID',
                    'lastModifiedTime', 'billingEntityUUID',
                    'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'sortOrder'}
@@ -2605,7 +2610,7 @@ class Resource(ComplexObject):
              enums.ResourceType, 'resourceKey': List(ResourceKey),
              'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
              'resourceState': enums.ResourceState, 'sortOrder': int,
-             'resourceName': str, 'resourceUUID': str, 'lastModifiedTime': int,
+             'resourceUUID': str, 'resourceName': str, 'lastModifiedTime': int,
              'billingEntityUUID': str, 'resourceCreateDate': datetime}
 
 
@@ -2805,13 +2810,13 @@ class Promotion(ComplexObject):
             the promotion code
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
+        str resourceUUID (F):
+            The UUID of the resource (read-only)
         str productOfferUUID (T):
             The numeric product offer ID associated with the promotion
             code
-        str resourceUUID (F):
-            The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -2824,8 +2829,8 @@ class Promotion(ComplexObject):
     ALL_ATTRIBS = {'productOfferName', 'startDate', 'endDate', 'providers',
                    'resourceType', 'resourceKey', 'resourceMetadata',
                    'billingEntityName', 'resourceState', 'noCardCheck',
-                   'sortOrder', 'resourceUUID', 'productOfferUUID',
-                   'resourceName', 'lastModifiedTime', 'billingEntityUUID',
+                   'sortOrder', 'resourceName', 'productOfferUUID',
+                   'resourceUUID', 'lastModifiedTime', 'billingEntityUUID',
                    'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'startDate', 'endDate', 'resourceType', 'noCardCheck',
                         'sortOrder', 'productOfferUUID', 'resourceName'}
@@ -2838,8 +2843,8 @@ class Promotion(ComplexObject):
              'resourceType': enums.ResourceType, 'resourceKey':
              List(ResourceKey), 'resourceMetadata': ResourceMetadata,
              'billingEntityName': str, 'resourceState': enums.ResourceState,
-             'noCardCheck': bool, 'sortOrder': int, 'resourceName': str,
-             'productOfferUUID': str, 'resourceUUID': str, 'lastModifiedTime':
+             'noCardCheck': bool, 'sortOrder': int, 'resourceUUID': str,
+             'productOfferUUID': str, 'resourceName': str, 'lastModifiedTime':
              int, 'billingEntityUUID': str, 'resourceCreateDate': datetime}
 
 
@@ -3101,8 +3106,8 @@ class Image(ComplexObject):
         str deploymentInstanceUUID (F):
             The uuid of the deployment instance the resource is created
             from
-        List(HypervisorSetting) hypervisorSettings (F):
-            The hypervisor settings defined for this image
+        List(PublishTo) publishedTo (F):
+            A list of UUIDs to whom the image is published
         str vdcUUID (T):
             The UUID of the VDC in which the resource is contained
         str productOfferUUID (F):
@@ -3111,14 +3116,14 @@ class Image(ComplexObject):
             The name of the resource
         datetime resourceCreateDate (F):
             The creation date of the resource
-        int size (F):
-            The size of the image
+        str defaultUser (F):
+            The default user for a server created using this image
         str productOfferName (F):
             The name of the product offer associated with the resource
         str clusterUUID (T):
             The UUID of the cluster in which the resource is located
-        str osChargeProductOfferUUID (F):
-            The UUID of the product offer used to charge for the image
+        ImagePermission userPermission (F):
+            The user image permissions
         str deploymentInstanceName (F):
             The name of the deployment instance the resource is created
             from
@@ -3128,6 +3133,8 @@ class Image(ComplexObject):
             Indicate if the image supports virtual machines
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        int size (F):
+            The size of the image
         str billingEntityUUID (F):
             The UUID of the Billing Entity to which the resource belongs
         enums.ImageType imageType (F):
@@ -3141,8 +3148,6 @@ class Image(ComplexObject):
             The name of the cluster in which the resource is located
         str vdcName (F):
             The name of the VDC in which the resource is contained
-        str defaultUser (F):
-            The default user for a server created using this image
         ImagePermission ownerPermission (F):
             The owner image permissions
         int lastModifiedTime (F):
@@ -3157,10 +3162,10 @@ class Image(ComplexObject):
             The type of the resource
         str baseName (F):
             The name of the resource from which the image was derived
-        List(PublishTo) publishedTo (F):
-            A list of UUIDs to whom the image is published
-        ImagePermission userPermission (F):
-            The user image permissions
+        List(HypervisorSetting) hypervisorSettings (F):
+            The hypervisor settings defined for this image
+        str osChargeProductOfferUUID (F):
+            The UUID of the product offer used to charge for the image
         str baseUUID (T):
             The UUID of the resource from which the image was derived
         List(ResourceKey) resourceKey (F):
@@ -3172,41 +3177,41 @@ class Image(ComplexObject):
     ALL_ATTRIBS = {'customerName', 'providers', 'snapshotUUID',
                    'resourceMetadata', 'billingEntityName', 'resourceState',
                    'customerValidString', 'deploymentInstanceUUID',
-                   'publishedTo', 'vdcUUID', 'productOfferUUID',
+                   'hypervisorSettings', 'vdcUUID', 'productOfferUUID',
                    'resourceName', 'resourceCreateDate', 'size',
-                   'productOfferName', 'clusterUUID', 'userPermission',
-                   'deploymentInstanceName', 'customerUUID', 'vmSupport',
-                   'resourceUUID', 'billingEntityUUID', 'imageType',
-                   'sortOrder', 'genPassword', 'clusterName', 'vdcName',
-                   'defaultUser', 'ownerPermission', 'lastModifiedTime',
+                   'productOfferName', 'clusterUUID',
+                   'osChargeProductOfferUUID', 'deploymentInstanceName',
+                   'customerUUID', 'vmSupport', 'resourceUUID',
+                   'billingEntityUUID', 'imageType', 'sortOrder',
+                   'genPassword', 'clusterName', 'vdcName', 'defaultUser',
+                   'ownerPermission', 'lastModifiedTime',
                    'osChargeProductOfferName', 'defaultSettings',
-                   'resourceType', 'baseName', 'hypervisorSettings',
-                   'osChargeProductOfferUUID', 'baseUUID', 'resourceKey',
-                   'ctSupport'}
+                   'resourceType', 'baseName', 'publishedTo', 'userPermission',
+                   'baseUUID', 'resourceKey', 'ctSupport'}
     REQUIRED_ATTRIBS = {'clusterUUID', 'resourceType', 'vmSupport',
                         'sortOrder', 'vdcUUID', 'resourceName', 'baseUUID',
                         'ctSupport'}
     OPTIONAL_ATTRIBS = {'customerName', 'providers', 'snapshotUUID',
                         'resourceMetadata', 'billingEntityName',
                         'resourceState', 'customerValidString',
-                        'deploymentInstanceUUID', 'hypervisorSettings',
+                        'deploymentInstanceUUID', 'publishedTo',
                         'productOfferUUID', 'resourceCreateDate', 'size',
-                        'productOfferName', 'osChargeProductOfferUUID',
+                        'productOfferName', 'userPermission',
                         'deploymentInstanceName', 'customerUUID',
                         'resourceUUID', 'billingEntityUUID', 'imageType',
                         'genPassword', 'clusterName', 'vdcName', 'defaultUser',
                         'ownerPermission', 'lastModifiedTime',
                         'osChargeProductOfferName', 'defaultSettings',
-                        'baseName', 'publishedTo', 'userPermission',
-                        'resourceKey'}
+                        'baseName', 'hypervisorSettings',
+                        'osChargeProductOfferUUID', 'resourceKey'}
     TYPES = {'customerName': str, 'providers': Dict(str, Dict(str, str)),
              'snapshotUUID': str, 'resourceMetadata': ResourceMetadata,
              'billingEntityName': str, 'resourceState': enums.ResourceState,
              'customerValidString': str, 'deploymentInstanceUUID': str,
-             'hypervisorSettings': List(HypervisorSetting), 'vdcUUID': str,
+             'publishedTo': List(PublishTo), 'vdcUUID': str,
              'productOfferUUID': str, 'resourceName': str,
              'resourceCreateDate': datetime, 'size': int, 'productOfferName':
-             str, 'clusterUUID': str, 'osChargeProductOfferUUID': str,
+             str, 'clusterUUID': str, 'userPermission': ImagePermission,
              'deploymentInstanceName': str, 'customerUUID': str, 'vmSupport':
              bool, 'resourceUUID': str, 'billingEntityUUID': str, 'imageType':
              enums.ImageType, 'sortOrder': int, 'genPassword': bool,
@@ -3214,8 +3219,8 @@ class Image(ComplexObject):
              'ownerPermission': ImagePermission, 'lastModifiedTime': int,
              'osChargeProductOfferName': str, 'defaultSettings':
              List(HypervisorSetting), 'resourceType': enums.ResourceType,
-             'baseName': str, 'publishedTo': List(PublishTo), 'userPermission':
-             ImagePermission, 'baseUUID': str, 'resourceKey':
+             'baseName': str, 'hypervisorSettings': List(HypervisorSetting),
+             'osChargeProductOfferUUID': str, 'baseUUID': str, 'resourceKey':
              List(ResourceKey), 'ctSupport': bool}
 
 
@@ -3273,27 +3278,27 @@ class FDLCodeBlock(ComplexObject):
             The config provider values
         enums.ResourceType resourceType (T):
             The type of the resource
-        bool editable (F):
-            Indicates whether the code block may be modified
+        str billingEntityName (F):
+            The Name of the Billing Entity to which the resource belongs
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
         ResourceMetadata resourceMetadata (F):
             The metadata attached to the resource
-        str billingEntityName (F):
-            The Name of the Billing Entity to which the resource belongs
+        bool editable (F):
+            Indicates whether the code block may be modified
         enums.ResourceState resourceState (F):
             The state of the resource
         datetime signingTimestamp (F):
             Holds the timestamp at which the code was signed
-        Dict(str, str) fdlProviderInfo (F):
-            A map of the provider information for the FDL Code Block
-        str resourceName (T):
-            The name of the resource
+        datetime resourceCreateDate (F):
+            The creation date of the resource
+        str resourceUUID (F):
+            The UUID of the resource (read-only)
         str unsignedCodeBlock (F):
             Holds the actual unsigned script data. This can not be used
             with FQL
-        str resourceUUID (F):
-            The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -3302,36 +3307,35 @@ class FDLCodeBlock(ComplexObject):
         str fdlHash (F):
             A unique hash representing the current state of the FDL Code
             Block
-        datetime resourceCreateDate (F):
-            The creation date of the resource
+        Dict(str, str) fdlProviderInfo (F):
+            A map of the provider information for the FDL Code Block
         int sortOrder (T):
             The sort order value for the given resource
     """
 
     ALL_ATTRIBS = {'signedCodeBlock', 'signatoryUUID', 'providers',
-                   'resourceType', 'billingEntityName', 'resourceKey',
-                   'resourceMetadata', 'editable', 'resourceState',
-                   'signingTimestamp', 'resourceCreateDate', 'resourceUUID',
-                   'unsignedCodeBlock', 'resourceName', 'lastModifiedTime',
-                   'billingEntityUUID', 'fdlHash', 'fdlProviderInfo',
+                   'resourceType', 'editable', 'resourceKey',
+                   'resourceMetadata', 'billingEntityName', 'resourceState',
+                   'signingTimestamp', 'fdlProviderInfo', 'resourceName',
+                   'unsignedCodeBlock', 'resourceUUID', 'lastModifiedTime',
+                   'billingEntityUUID', 'fdlHash', 'resourceCreateDate',
                    'sortOrder'}
     REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'sortOrder'}
     OPTIONAL_ATTRIBS = {'signedCodeBlock', 'signatoryUUID', 'providers',
-                        'editable', 'resourceKey', 'resourceMetadata',
-                        'billingEntityName', 'resourceState',
-                        'signingTimestamp', 'fdlProviderInfo',
-                        'unsignedCodeBlock', 'resourceUUID',
-                        'lastModifiedTime', 'billingEntityUUID', 'fdlHash',
-                        'resourceCreateDate'}
+                        'billingEntityName', 'resourceKey', 'resourceMetadata',
+                        'editable', 'resourceState', 'signingTimestamp',
+                        'resourceCreateDate', 'unsignedCodeBlock',
+                        'resourceUUID', 'lastModifiedTime',
+                        'billingEntityUUID', 'fdlHash', 'fdlProviderInfo'}
     TYPES = {'signedCodeBlock': str, 'signatoryUUID': str, 'providers':
              Dict(str, Dict(str, str)), 'resourceType': enums.ResourceType,
-             'editable': bool, 'resourceKey': List(ResourceKey),
-             'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
+             'billingEntityName': str, 'resourceKey': List(ResourceKey),
+             'resourceMetadata': ResourceMetadata, 'editable': bool,
              'resourceState': enums.ResourceState, 'signingTimestamp':
-             datetime, 'fdlProviderInfo': Dict(str, str), 'resourceName': str,
-             'unsignedCodeBlock': str, 'resourceUUID': str, 'lastModifiedTime':
-             int, 'billingEntityUUID': str, 'fdlHash': str,
-             'resourceCreateDate': datetime, 'sortOrder': int}
+             datetime, 'resourceCreateDate': datetime, 'resourceUUID': str,
+             'unsignedCodeBlock': str, 'resourceName': str, 'lastModifiedTime':
+             int, 'billingEntityUUID': str, 'fdlHash': str, 'fdlProviderInfo':
+             Dict(str, str), 'sortOrder': int}
 
 
 class CreditNote(ComplexObject):
@@ -3374,8 +3378,8 @@ class CreditNote(ComplexObject):
             The amount of tax associated with the invoice
         int currencyId (F):
             The currency id of the invoice
-        int sortOrder (T):
-            The sort order value for the given resource
+        str customerUUID (T):
+            The UUID of the customer
         str transactionUUID (F):
             The UUID of the transaction
         str resourceUUID (F):
@@ -3384,8 +3388,8 @@ class CreditNote(ComplexObject):
             The invoice items
         float invoiceTotalInc (F):
             The invoice total including tax
-        str customerUUID (T):
-            The UUID of the customer
+        int sortOrder (T):
+            The sort order value for the given resource
         enums.InvoiceStatus status (F):
             The invoice status
         str billingEntityVatNo (F):
@@ -3424,16 +3428,16 @@ class CreditNote(ComplexObject):
                    'cutOffDate', 'resourceMetadata', 'billingEntityName',
                    'resourceState', 'customerVatNo', 'testMode',
                    'resourceName', 'dueDate', 'resourceCreateDate', 'paidDate',
-                   'invoiceTaxAmt', 'currencyId', 'customerUUID',
+                   'invoiceTaxAmt', 'currencyId', 'sortOrder',
                    'transactionUUID', 'resourceUUID', 'invoiceItems',
-                   'invoiceTotalInc', 'sortOrder', 'status',
+                   'invoiceTotalInc', 'customerUUID', 'status',
                    'billingEntityVatNo', 'customerAddress', 'invoiceTotalExc',
                    'pdfRef', 'billingAddress', 'paymentMethodInstanceUUID',
                    'lastModifiedTime', 'invoiceNo', 'resourceType',
                    'billingEntityUUID', 'resourceKey',
                    'paymentMethodInstanceName', 'pdf', 'creditNote'}
-    REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'customerUUID',
-                        'invoiceDate', 'sortOrder'}
+    REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'sortOrder',
+                        'invoiceDate', 'customerUUID'}
     OPTIONAL_ATTRIBS = {'taxRate', 'customerName', 'paidDate', 'providers',
                         'cutOffDate', 'resourceMetadata', 'billingEntityName',
                         'resourceState', 'customerVatNo', 'testMode',
@@ -3451,9 +3455,9 @@ class CreditNote(ComplexObject):
              'resourceState': enums.ResourceState, 'customerVatNo': str,
              'testMode': bool, 'resourceName': str, 'dueDate': int,
              'resourceCreateDate': datetime, 'paidDate': int, 'invoiceTaxAmt':
-             float, 'currencyId': int, 'sortOrder': int, 'transactionUUID':
+             float, 'currencyId': int, 'customerUUID': str, 'transactionUUID':
              str, 'resourceUUID': str, 'invoiceItems': List(InvoiceItem),
-             'invoiceTotalInc': float, 'customerUUID': str, 'status':
+             'invoiceTotalInc': float, 'sortOrder': int, 'status':
              enums.InvoiceStatus, 'billingEntityVatNo': str, 'customerAddress':
              Address, 'invoiceTotalExc': float, 'pdfRef': str,
              'billingAddress': Address, 'paymentMethodInstanceUUID': str,
@@ -3503,8 +3507,8 @@ class Invoice(ComplexObject):
             The amount of tax associated with the invoice
         int currencyId (F):
             The currency id of the invoice
-        int sortOrder (T):
-            The sort order value for the given resource
+        str customerUUID (T):
+            The UUID of the customer
         str transactionUUID (F):
             The UUID of the transaction
         str resourceUUID (F):
@@ -3513,8 +3517,8 @@ class Invoice(ComplexObject):
             The invoice items
         float invoiceTotalInc (F):
             The invoice total including tax
-        str customerUUID (T):
-            The UUID of the customer
+        int sortOrder (T):
+            The sort order value for the given resource
         enums.InvoiceStatus status (F):
             The invoice status
         str billingEntityVatNo (F):
@@ -3553,16 +3557,16 @@ class Invoice(ComplexObject):
                    'cutOffDate', 'resourceMetadata', 'billingEntityName',
                    'resourceState', 'customerVatNo', 'testMode',
                    'resourceName', 'dueDate', 'resourceCreateDate', 'paidDate',
-                   'invoiceTaxAmt', 'currencyId', 'customerUUID',
+                   'invoiceTaxAmt', 'currencyId', 'sortOrder',
                    'transactionUUID', 'resourceUUID', 'invoiceItems',
-                   'invoiceTotalInc', 'sortOrder', 'status',
+                   'invoiceTotalInc', 'customerUUID', 'status',
                    'billingEntityVatNo', 'customerAddress', 'invoiceTotalExc',
                    'pdfRef', 'billingAddress', 'paymentMethodInstanceUUID',
                    'lastModifiedTime', 'invoiceNo', 'resourceType',
                    'billingEntityUUID', 'resourceKey',
                    'paymentMethodInstanceName', 'pdf', 'creditNote'}
-    REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'customerUUID',
-                        'invoiceDate', 'sortOrder'}
+    REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'sortOrder',
+                        'invoiceDate', 'customerUUID'}
     OPTIONAL_ATTRIBS = {'taxRate', 'customerName', 'paidDate', 'providers',
                         'cutOffDate', 'resourceMetadata', 'billingEntityName',
                         'resourceState', 'customerVatNo', 'testMode',
@@ -3580,9 +3584,9 @@ class Invoice(ComplexObject):
              'resourceState': enums.ResourceState, 'customerVatNo': str,
              'testMode': bool, 'resourceName': str, 'dueDate': int,
              'resourceCreateDate': datetime, 'paidDate': int, 'invoiceTaxAmt':
-             float, 'currencyId': int, 'sortOrder': int, 'transactionUUID':
+             float, 'currencyId': int, 'customerUUID': str, 'transactionUUID':
              str, 'resourceUUID': str, 'invoiceItems': List(InvoiceItem),
-             'invoiceTotalInc': float, 'customerUUID': str, 'status':
+             'invoiceTotalInc': float, 'sortOrder': int, 'status':
              enums.InvoiceStatus, 'billingEntityVatNo': str, 'customerAddress':
              Address, 'invoiceTotalExc': float, 'pdfRef': str,
              'billingAddress': Address, 'paymentMethodInstanceUUID': str,
@@ -3796,8 +3800,6 @@ class CustomerDetails(ComplexObject):
             etc.)
         List(UserDetails) users (F):
             The users/contacts associated with the customer
-        bool exceedCutoffLimit (T):
-            Boolean indicating if customer exceeds the cuoff limit
         Dict(enums.Limits, int) limitsMap (T):
             A map containing the system limitations of the customer
         bool vatExempt (F):
@@ -3822,6 +3824,8 @@ class CustomerDetails(ComplexObject):
             A flag to indicate whether the customer has a credit account
         str timeZone (F):
             The timezone associated with the customer
+        bool exceedCutoffLimit (T):
+            Boolean indicating if customer exceeds the cuoff limit
         float warningLevel (F):
             The unit level below which which a low balance warning
             should be sent
@@ -3836,11 +3840,11 @@ class CustomerDetails(ComplexObject):
                    'validatedString', 'exceedCreditLimit', 'promotionName',
                    'carryOverBalance', 'customerUUID', 'promotionUUID',
                    'resourceUUID', 'nonCarryOverBalance', 'billingEntityUUID',
-                   'email', 'sortOrder', 'status', 'users', 'limitsMap',
-                   'vatExempt', 'groups', 'address', 'lastModifiedTime',
-                   'customerCardCheck', 'resourceType', 'resourceKey',
-                   'vatNumber', 'creditCustomer', 'timeZone',
-                   'exceedCutoffLimit', 'warningLevel', 'warningSent'}
+                   'email', 'sortOrder', 'status', 'users',
+                   'exceedCutoffLimit', 'limitsMap', 'vatExempt', 'groups',
+                   'address', 'lastModifiedTime', 'customerCardCheck',
+                   'resourceType', 'resourceKey', 'vatNumber',
+                   'creditCustomer', 'timeZone', 'warningLevel', 'warningSent'}
     REQUIRED_ATTRIBS = {'productOfferName', 'status', 'validatedString',
                         'promotionUUID', 'resourceType', 'exceedCreditLimit',
                         'limitsMap', 'carryOverBalance', 'customerUUID',
@@ -3863,14 +3867,14 @@ class CustomerDetails(ComplexObject):
              'carryOverBalance': float, 'customerUUID': str, 'promotionUUID':
              str, 'resourceUUID': str, 'nonCarryOverBalance': float,
              'billingEntityUUID': str, 'email': str, 'sortOrder': int,
-             'status': enums.Status, 'users': List(UserDetails),
-             'exceedCutoffLimit': bool, 'limitsMap': Dict(enums.Limits, int),
-             'vatExempt': bool, 'groups': List(Group), 'address': Address,
-             'lastModifiedTime': int, 'customerCardCheck': bool,
-             'resourceType': enums.ResourceType, 'resourceKey':
-             List(ResourceKey), 'vatNumber': str, 'creditCustomer':
-             enums.PaymentType, 'timeZone': str, 'warningLevel': float,
-             'warningSent': bool}
+             'status': enums.Status, 'users': List(UserDetails), 'limitsMap':
+             Dict(enums.Limits, int), 'vatExempt': bool, 'groups':
+             List(Group), 'address': Address, 'lastModifiedTime': int,
+             'customerCardCheck': bool, 'resourceType': enums.ResourceType,
+             'resourceKey': List(ResourceKey), 'vatNumber': str,
+             'creditCustomer': enums.PaymentType, 'timeZone': str,
+             'exceedCutoffLimit': bool, 'warningLevel': float, 'warningSent':
+             bool}
 
 
 class Permission(ComplexObject):
@@ -3912,8 +3916,6 @@ class IP(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        str ipAddress (T):
-            The IP address
         Firewall firewall (T):
             A firewall object to be passed when the IP address, This is
             only used at create time
@@ -3925,22 +3927,24 @@ class IP(ComplexObject):
         str subnetUUID (F):
             The UUID of the subnet object in which the IP address is
             located
-        enums.IPType type (T):
-            The type of the IP address (IPv4 or IPv6)
         str nicUUID (F):
             The UUID of the NIC to which the IP address is attached
+        enums.IPType type (T):
+            The type of the IP address (IPv4 or IPv6)
         str gatewayAddress (T):
             The default gateway address
+        str ipAddress (T):
+            The IP address
     """
 
-    ALL_ATTRIBS = {'firewall', 'auto', 'prifixLegth', 'subnetUUID', 'nicUUID',
-                   'type', 'ipAddress', 'gatewayAddress'}
-    REQUIRED_ATTRIBS = {'firewall', 'ipAddress', 'prifixLegth', 'type',
+    ALL_ATTRIBS = {'ipAddress', 'firewall', 'auto', 'prifixLegth',
+                   'subnetUUID', 'type', 'nicUUID', 'gatewayAddress'}
+    REQUIRED_ATTRIBS = {'firewall', 'type', 'prifixLegth', 'ipAddress',
                         'gatewayAddress'}
     OPTIONAL_ATTRIBS = {'auto', 'subnetUUID', 'nicUUID'}
-    TYPES = {'gatewayAddress': str, 'firewall': Firewall, 'auto': bool,
-             'prifixLegth': int, 'subnetUUID': str, 'type': enums.IPType,
-             'nicUUID': str, 'ipAddress': str}
+    TYPES = {'firewall': Firewall, 'auto': bool, 'prifixLegth': int,
+             'subnetUUID': str, 'nicUUID': str, 'type': enums.IPType,
+             'ipAddress': str, 'gatewayAddress': str}
 
 
 class BillingEntityDetails(ComplexObject):
@@ -3950,9 +3954,8 @@ class BillingEntityDetails(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        str parentUUID (F):
-            The UUID of the immediate parent billing entity of this
-            billing entity
+        Dict(enums.BillingEntityVAR, str) standardEmailSettings (F):
+            Map of email settings for the Billing Entity
         Dict(str, Dict(str, str)) providers (F):
             The config provider values
         str parentName (F):
@@ -3973,13 +3976,13 @@ class BillingEntityDetails(ComplexObject):
             associated with the Billing Entity for a non-3DS transaction
         datetime resourceCreateDate (F):
             The creation date of the resource
-        str controlPanelURL (F):
-            The public facing URL of the control panel for the Billing
-            Entity
+        str description (F):
+            The textual description of the Billing Entity
         int currencyId (T):
             The numeric currency ID associated with the Billing Entity
-        Dict(enums.BillingEntityVAR, str) standardEmailSettings (F):
-            Map of email settings for the Billing Entity
+        str parentUUID (F):
+            The UUID of the immediate parent billing entity of this
+            billing entity
         List(enums.ResourceType) permittedPOResourceTypes (F):
             This holds lists of resource types which are allowed for a
             product offer to add/modify/delete
@@ -3997,8 +4000,9 @@ class BillingEntityDetails(ComplexObject):
             The type of the billing entity
         ResourceMetadata resourceMetadata (F):
             The metadata attached to the resource
-        str description (F):
-            The textual description of the Billing Entity
+        str controlPanelURL (F):
+            The public facing URL of the control panel for the Billing
+            Entity
         List(str) descendants (F):
             A list of the uuids of all billing entities that descend
             from this billing entity
@@ -4026,47 +4030,48 @@ class BillingEntityDetails(ComplexObject):
             The VAT number / tax reference of the Billing Entity
     """
 
-    ALL_ATTRIBS = {'standardEmailSettings', 'providers', 'parentName',
+    ALL_ATTRIBS = {'parentUUID', 'providers', 'parentName',
                    'billingEntityName', 'resourceState', 'currency',
                    'resourceName', 'adminControlPanelURL',
-                   'no3ds28DaySpendLimit', 'resourceCreateDate', 'description',
-                   'currencyId', 'parentUUID', 'permittedPOResourceTypes',
-                   'sortOrder', 'resourceUUID', 'billingEntityUUID',
-                   'invoiceSetting', 'enableUserEditing', 'billingType',
-                   'resourceMetadata', 'controlPanelURL', 'descendants',
-                   'brand', 'address', 'lastModifiedTime', 'emailTemplates',
-                   'systemCapabilities', 'overall28DaySpendLimit',
-                   'resourceType', 'resourceKey', 'vatNumber'}
+                   'no3ds28DaySpendLimit', 'resourceCreateDate',
+                   'controlPanelURL', 'currencyId', 'standardEmailSettings',
+                   'permittedPOResourceTypes', 'sortOrder', 'resourceUUID',
+                   'billingEntityUUID', 'invoiceSetting', 'enableUserEditing',
+                   'billingType', 'resourceMetadata', 'description',
+                   'descendants', 'brand', 'address', 'lastModifiedTime',
+                   'emailTemplates', 'systemCapabilities',
+                   'overall28DaySpendLimit', 'resourceType', 'resourceKey',
+                   'vatNumber'}
     REQUIRED_ATTRIBS = {'currencyId', 'resourceName', 'resourceType',
                         'sortOrder'}
-    OPTIONAL_ATTRIBS = {'parentUUID', 'providers', 'parentName',
+    OPTIONAL_ATTRIBS = {'standardEmailSettings', 'providers', 'parentName',
                         'billingEntityName', 'resourceState', 'currency',
                         'adminControlPanelURL', 'no3ds28DaySpendLimit',
-                        'resourceCreateDate', 'controlPanelURL',
-                        'standardEmailSettings', 'permittedPOResourceTypes',
-                        'resourceUUID', 'billingEntityUUID', 'invoiceSetting',
+                        'resourceCreateDate', 'description', 'parentUUID',
+                        'permittedPOResourceTypes', 'resourceUUID',
+                        'billingEntityUUID', 'invoiceSetting',
                         'enableUserEditing', 'billingType', 'resourceMetadata',
-                        'description', 'descendants', 'brand', 'address',
+                        'controlPanelURL', 'descendants', 'brand', 'address',
                         'lastModifiedTime', 'emailTemplates',
                         'systemCapabilities', 'overall28DaySpendLimit',
                         'resourceKey', 'vatNumber'}
-    TYPES = {'parentUUID': str, 'providers': Dict(str, Dict(str, str)),
-             'parentName': str, 'billingEntityName': str, 'resourceState':
-             enums.ResourceState, 'currency': Currency, 'resourceName': str,
-             'adminControlPanelURL': str, 'no3ds28DaySpendLimit': float,
-             'resourceCreateDate': datetime, 'controlPanelURL': str,
-             'currencyId': int, 'standardEmailSettings':
-             Dict(enums.BillingEntityVAR, str), 'permittedPOResourceTypes':
-             List(enums.ResourceType), 'sortOrder': int, 'resourceUUID': str,
-             'billingEntityUUID': str, 'invoiceSetting': InvoiceSetting,
-             'enableUserEditing': bool, 'billingType': enums.BillingType,
-             'resourceMetadata': ResourceMetadata, 'description': str,
-             'descendants': List(str), 'brand': int, 'address': Address,
-             'lastModifiedTime': int, 'emailTemplates':
-             Dict(enums.EmailType, EmailTemplate), 'systemCapabilities':
-             SystemCapabilitySet, 'overall28DaySpendLimit': float,
-             'resourceType': enums.ResourceType, 'resourceKey':
-             List(ResourceKey), 'vatNumber': str}
+    TYPES = {'standardEmailSettings': Dict(enums.BillingEntityVAR, str),
+             'providers': Dict(str, Dict(str, str)), 'parentName': str,
+             'billingEntityName': str, 'resourceState': enums.ResourceState,
+             'currency': Currency, 'resourceName': str, 'adminControlPanelURL':
+             str, 'no3ds28DaySpendLimit': float, 'resourceCreateDate':
+             datetime, 'description': str, 'currencyId': int, 'parentUUID':
+             str, 'permittedPOResourceTypes': List(enums.ResourceType),
+             'sortOrder': int, 'resourceUUID': str, 'billingEntityUUID': str,
+             'invoiceSetting': InvoiceSetting, 'enableUserEditing': bool,
+             'billingType': enums.BillingType, 'resourceMetadata':
+             ResourceMetadata, 'controlPanelURL': str, 'descendants':
+             List(str), 'brand': int, 'address': Address, 'lastModifiedTime':
+             int, 'emailTemplates': Dict(enums.EmailType, EmailTemplate),
+             'systemCapabilities': SystemCapabilitySet,
+             'overall28DaySpendLimit': float, 'resourceType':
+             enums.ResourceType, 'resourceKey': List(ResourceKey), 'vatNumber':
+             str}
 
 
 class Question(ComplexObject):
@@ -4076,20 +4081,20 @@ class Question(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        Resource resource (T):
-            The resource to which the question relates
-        str keyName (T):
-            The name of the key with which the question is associated
         str type (T):
             The type of the reply to the question
+        str keyName (T):
+            The name of the key with which the question is associated
+        Resource resource (T):
+            The resource to which the question relates
         str name (T):
             The question to be asked
     """
 
-    ALL_ATTRIBS = {'type', 'keyName', 'resource', 'name'}
-    REQUIRED_ATTRIBS = {'resource', 'keyName', 'type', 'name'}
+    ALL_ATTRIBS = {'resource', 'keyName', 'type', 'name'}
+    REQUIRED_ATTRIBS = {'type', 'keyName', 'resource', 'name'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'resource': Resource, 'keyName': str, 'type': str, 'name': str}
+    TYPES = {'type': str, 'keyName': str, 'resource': Resource, 'name': str}
 
 
 class ValueValidator(ComplexObject):
@@ -4099,12 +4104,12 @@ class ValueValidator(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
+        str validateString (T):
+            The validate string.
         str errorMessage (F):
             A custom error message to display if the validation
             specified by the 'validatorType' and 'validateString' are
             not met
-        str validateString (T):
-            The validate string.
         bool allowsMultipleValues (T):
             State if the value string allows multiple, comma seperated,
             values to be specified
@@ -4115,12 +4120,12 @@ class ValueValidator(ComplexObject):
             The validator type.
     """
 
-    ALL_ATTRIBS = {'validateString', 'errorMessage', 'allowsMultipleValues',
+    ALL_ATTRIBS = {'errorMessage', 'validateString', 'allowsMultipleValues',
                    'searchFilter', 'validatorType'}
     REQUIRED_ATTRIBS = {'validateString', 'allowsMultipleValues',
                         'validatorType'}
     OPTIONAL_ATTRIBS = {'errorMessage', 'searchFilter'}
-    TYPES = {'errorMessage': str, 'validateString': str,
+    TYPES = {'validateString': str, 'errorMessage': str,
              'allowsMultipleValues': bool, 'searchFilter': SearchFilter,
              'validatorType': enums.ValidatorType}
 
@@ -4132,23 +4137,23 @@ class ResolvableReference(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        List(GenericContainer) alternateReferences (T):
-            List of alternate references to use
         enums.ResourceType missingType (T):
             The missing resourcetype
+        List(GenericContainer) alternateReferences (T):
+            List of alternate references to use
         str missingUUID (T):
             The missing resource uuid
         Resource referenceResource (T):
             The reference resource
     """
 
-    ALL_ATTRIBS = {'missingType', 'alternateReferences', 'missingUUID',
+    ALL_ATTRIBS = {'alternateReferences', 'missingType', 'missingUUID',
                    'referenceResource'}
-    REQUIRED_ATTRIBS = {'alternateReferences', 'missingType', 'missingUUID',
+    REQUIRED_ATTRIBS = {'missingType', 'alternateReferences', 'missingUUID',
                         'referenceResource'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'alternateReferences': List(GenericContainer), 'missingType':
-             enums.ResourceType, 'missingUUID': str, 'referenceResource':
+    TYPES = {'missingType': enums.ResourceType, 'alternateReferences':
+             List(GenericContainer), 'missingUUID': str, 'referenceResource':
              Resource}
 
 
@@ -4323,8 +4328,8 @@ class Nic(ComplexObject):
             The UUID of the cluster in which the resource is located
         str serverName (F):
             The name of the server to which the NIC is attached
-        str clusterName (F):
-            The name of the cluster in which the resource is located
+        str networkUUID (T):
+            The UUID of the network to which the NIC is attached
         str deploymentInstanceName (F):
             The name of the deployment instance the resource is created
             from
@@ -4336,8 +4341,8 @@ class Nic(ComplexObject):
             The UUID of the Billing Entity to which the resource belongs
         int sortOrder (T):
             The sort order value for the given resource
-        str networkUUID (T):
-            The UUID of the network to which the NIC is attached
+        str clusterName (F):
+            The name of the cluster in which the resource is located
         str vdcName (F):
             The name of the VDC in which the resource is contained
         enums.NetworkType networkType (T):
@@ -4360,9 +4365,9 @@ class Nic(ComplexObject):
                    'deploymentInstanceUUID', 'ipAddresses', 'vdcUUID',
                    'productOfferUUID', 'resourceName', 'resourceCreateDate',
                    'productOfferName', 'index', 'clusterUUID', 'serverName',
-                   'networkUUID', 'deploymentInstanceName', 'customerUUID',
+                   'clusterName', 'deploymentInstanceName', 'customerUUID',
                    'resourceUUID', 'billingEntityUUID', 'sortOrder',
-                   'clusterName', 'vdcName', 'networkType', 'lastModifiedTime',
+                   'networkUUID', 'vdcName', 'networkType', 'lastModifiedTime',
                    'networkName', 'resourceType', 'resourceKey', 'serverUUID'}
     REQUIRED_ATTRIBS = {'clusterUUID', 'networkUUID', 'vdcUUID',
                         'resourceType', 'serverUUID', 'sortOrder',
@@ -4382,10 +4387,10 @@ class Nic(ComplexObject):
              'deploymentInstanceUUID': str, 'ipAddresses': List(IP), 'vdcUUID':
              str, 'productOfferUUID': str, 'resourceName': str,
              'resourceCreateDate': datetime, 'productOfferName': str, 'index':
-             int, 'clusterUUID': str, 'serverName': str, 'clusterName': str,
+             int, 'clusterUUID': str, 'serverName': str, 'networkUUID': str,
              'deploymentInstanceName': str, 'customerUUID': str,
              'resourceUUID': str, 'billingEntityUUID': str, 'sortOrder': int,
-             'networkUUID': str, 'vdcName': str, 'networkType':
+             'clusterName': str, 'vdcName': str, 'networkType':
              enums.NetworkType, 'lastModifiedTime': int, 'networkName': str,
              'resourceType': enums.ResourceType, 'resourceKey':
              List(ResourceKey), 'serverUUID': str}
@@ -4400,17 +4405,17 @@ class DryRunResult(ComplexObject):
     Attributes (type name (required): description:
         List(ResolvableReference) resolvableReferences (F):
             The list of references
-        List(Question) questions (F):
-            The list of question
         bool success (F):
             success or failure
+        List(Question) questions (F):
+            The list of question
     """
 
-    ALL_ATTRIBS = {'resolvableReferences', 'success', 'questions'}
+    ALL_ATTRIBS = {'resolvableReferences', 'questions', 'success'}
     REQUIRED_ATTRIBS = set()
-    OPTIONAL_ATTRIBS = {'resolvableReferences', 'questions', 'success'}
-    TYPES = {'resolvableReferences': List(ResolvableReference), 'questions':
-             List(Question), 'success': bool}
+    OPTIONAL_ATTRIBS = {'resolvableReferences', 'success', 'questions'}
+    TYPES = {'resolvableReferences': List(ResolvableReference), 'success':
+             bool, 'questions': List(Question)}
 
 
 class Value(ComplexObject):
@@ -4500,6 +4505,9 @@ class ReportMethod(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
+        List(enums.ReportChartType) supportedReportChartTypes (T):
+            A set of report chart types whcih are supported by the
+            report method.
         enums.InvocationLevel invocationLevel (T):
             The level of authentication required to access the report
             method
@@ -4510,48 +4518,45 @@ class ReportMethod(ComplexObject):
             The config provider values
         enums.ResourceType resourceType (T):
             The type of the resource
-        str fdlReference (T):
-            The unique reference of the report method entry point in the
-            FDL Code Block
+        str fdlName (T):
+            The name of the FDL Code Block that contains the function
         str fdlDescription (T):
             The long form description of the FDL function.
         ResourceMetadata resourceMetadata (F):
             The metadata attached to the resource
         str billingEntityName (F):
             The Name of the Billing Entity to which the resource belongs
-        List(enums.ReportChartType) supportedReportChartTypes (T):
-            A set of report chart types whcih are supported by the
-            report method.
+        enums.ResourceState resourceState (F):
+            The state of the resource
         str fdlUUID (T):
             The UUID of the FDL Code Block that contains the report
             method.
-        str billingEntityUUID (F):
-            The UUID of the Billing Entity to which the resource belongs
-        enums.ResourceState resourceState (F):
-            The state of the resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        int sortOrder (T):
+            The sort order value for the given resource
+        str fdlReference (T):
+            The unique reference of the report method entry point in the
+            FDL Code Block
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
-        str fdlName (T):
-            The name of the FDL Code Block that contains the function
+        str billingEntityUUID (F):
+            The UUID of the Billing Entity to which the resource belongs
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
         datetime resourceCreateDate (F):
             The creation date of the resource
-        int sortOrder (T):
-            The sort order value for the given resource
     """
 
     ALL_ATTRIBS = {'invocationLevel', 'inputValues', 'providers',
                    'resourceType', 'fdlReference', 'fdlDescription',
                    'resourceMetadata', 'billingEntityName',
-                   'supportedReportChartTypes', 'fdlUUID', 'fdlName',
-                   'resourceState', 'resourceUUID', 'resourceName',
-                   'lastModifiedTime', 'billingEntityUUID', 'resourceKey',
+                   'supportedReportChartTypes', 'fdlUUID', 'billingEntityUUID',
+                   'resourceState', 'resourceName', 'resourceUUID',
+                   'lastModifiedTime', 'fdlName', 'resourceKey',
                    'resourceCreateDate', 'sortOrder'}
     REQUIRED_ATTRIBS = {'invocationLevel', 'inputValues', 'resourceType',
                         'fdlReference', 'fdlDescription',
@@ -4561,16 +4566,16 @@ class ReportMethod(ComplexObject):
                         'billingEntityName', 'resourceState', 'resourceUUID',
                         'lastModifiedTime', 'billingEntityUUID',
                         'resourceCreateDate'}
-    TYPES = {'sortOrder': int, 'invocationLevel': enums.InvocationLevel,
-             'inputValues': List(Value), 'providers':
-             Dict(str, Dict(str, str)), 'resourceType': enums.ResourceType,
-             'fdlReference': str, 'fdlDescription': str, 'resourceMetadata':
-             ResourceMetadata, 'billingEntityName': str,
-             'supportedReportChartTypes': List(enums.ReportChartType),
-             'fdlUUID': str, 'resourceState': enums.ResourceState,
-             'resourceName': str, 'resourceUUID': str, 'lastModifiedTime': int,
-             'fdlName': str, 'resourceKey': List(ResourceKey),
-             'resourceCreateDate': datetime, 'billingEntityUUID': str}
+    TYPES = {'invocationLevel': enums.InvocationLevel, 'inputValues':
+             List(Value), 'providers': Dict(str, Dict(str, str)),
+             'resourceType': enums.ResourceType, 'fdlReference': str,
+             'fdlDescription': str, 'resourceMetadata': ResourceMetadata,
+             'billingEntityName': str, 'supportedReportChartTypes':
+             List(enums.ReportChartType), 'fdlUUID': str, 'fdlName': str,
+             'resourceState': enums.ResourceState, 'resourceUUID': str,
+             'resourceName': str, 'lastModifiedTime': int, 'billingEntityUUID':
+             str, 'resourceKey': List(ResourceKey), 'resourceCreateDate':
+             datetime, 'sortOrder': int}
 
 
 class ActionDefinition(ComplexObject):
@@ -4586,8 +4591,8 @@ class ActionDefinition(ComplexObject):
             describeResource.
         str description (T):
             The description of the defined action
-        List(Value) parameters (T):
-            The parameters of the defined action
+        str name (T):
+            The name of the defined action
         List(enums.InvocationLevel) invocationLevels (T):
             The API autentication levels allowed to invoke the action
         enums.InvocationType invocationType (T):
@@ -4600,28 +4605,28 @@ class ActionDefinition(ComplexObject):
             The key of the defined action
         enums.FDLReturnType returnType (T):
             The return type of the defined action
-        str icon (T):
-            The font icon to be displayed for generated buttons.
+        List(Value) parameters (T):
+            The parameters of the defined action
         int order (T):
             The order the action should be displayed compared to other
             actions, used in the Skyline UI
-        str name (T):
-            The name of the defined action
+        str icon (T):
+            The font icon to be displayed for generated buttons.
     """
 
     ALL_ATTRIBS = {'available', 'description', 'parameters',
-                   'invocationLevels', 'name', 'invocationType',
-                   'executionFunction', 'fdlUUID', 'key', 'returnType',
-                   'order', 'icon'}
-    REQUIRED_ATTRIBS = {'available', 'name', 'parameters', 'invocationLevels',
-                        'invocationType', 'executionFunction', 'fdlUUID',
-                        'key', 'returnType', 'icon', 'order', 'description'}
+                   'invocationLevels', 'invocationType', 'executionFunction',
+                   'fdlUUID', 'key', 'returnType', 'icon', 'order', 'name'}
+    REQUIRED_ATTRIBS = {'available', 'description', 'parameters',
+                        'invocationLevels', 'name', 'invocationType',
+                        'executionFunction', 'fdlUUID', 'key', 'returnType',
+                        'order', 'icon'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'available': bool, 'name': str, 'parameters': List(Value),
-             'invocationLevels': List(enums.InvocationLevel), 'invocationType':
-             enums.InvocationType, 'executionFunction': str, 'fdlUUID': str,
-             'key': str, 'returnType': enums.FDLReturnType, 'icon': str,
-             'order': int, 'description': str}
+    TYPES = {'available': bool, 'description': str, 'parameters': List(Value),
+             'invocationLevels': List(enums.InvocationLevel), 'name': str,
+             'invocationType': enums.InvocationType, 'executionFunction': str,
+             'fdlUUID': str, 'key': str, 'returnType': enums.FDLReturnType,
+             'order': int, 'icon': str}
 
 
 class ProductComponent(ComplexObject):
@@ -4666,14 +4671,11 @@ class Server(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        bool disableEmulatedDevices (F):
-            Instruct the hypervisor running the server to disable
-            emulated devices or not. This will only work if the cluster
-            has the DISABLE_EMULATED_DEVICE feature set. If the emulated
-            devices are set to be disabled (default setting) the the
-            server will be only presenetd with the para-virtualized
-            devices. Any change to this value will need a server stop
-            start
+        enums.ServerStatus status (F):
+            The status of the server (e.g. whether it is running or
+            stopped)
+        enums.VirtualizationType virtualizationType (T):
+            The virtualization type of the server
         str customerName (F):
             The name of the customer that owns the resource
         Dict(str, Dict(str, str)) providers (F):
@@ -4725,11 +4727,16 @@ class Server(ComplexObject):
             The UUID of the Billing Entity to which the resource belongs
         int sortOrder (T):
             The sort order value for the given resource
-        enums.ServerStatus status (F):
-            The status of the server (e.g. whether it is running or
-            stopped)
-        enums.VirtualizationType virtualizationType (T):
-            The virtualization type of the server
+        bool disableEmulatedDevices (F):
+            Instruct the hypervisor running the server to disable
+            emulated devices or not. This will only work if the cluster
+            has the DISABLE_EMULATED_DEVICE feature set. If the emulated
+            devices are set to be disabled (default setting) the the
+            server will be only presenetd with the para-virtualized
+            devices. Any change to this value will need a server stop
+            start
+        List(enums.ServerCapability) serverCapabilities (T):
+            The list of allowed server capabilities
         ResourceMetadata resourceMetadata (F):
             The metadata attached to the resource
         str clusterName (F):
@@ -4738,8 +4745,6 @@ class Server(ComplexObject):
             The ID of the running server on the associated node
         str vdcName (F):
             The name of the VDC in which the resource is contained
-        List(enums.ServerCapability) serverCapabilities (T):
-            The list of allowed server capabilities
         str initialUser (F):
             The initial user name associated with the server (passed by
             metadata so a first boot process can initialise the
@@ -4773,14 +4778,14 @@ class Server(ComplexObject):
             The number of virtual CPU cores assigned to the server
     """
 
-    ALL_ATTRIBS = {'status', 'customerName', 'providers', 'snapshotUUID',
-                   'ram', 'billingEntityName', 'resourceState',
+    ALL_ATTRIBS = {'disableEmulatedDevices', 'customerName', 'providers',
+                   'snapshotUUID', 'ram', 'billingEntityName', 'resourceState',
                    'deploymentInstanceUUID', 'resourceName',
                    'productOfferUUID', 'nodeIP', 'resourceCreateDate',
                    'productOfferName', 'clusterUUID', 'nodeName',
                    'initialPassword', 'nics', 'imagePermission', 'imageName',
                    'customerUUID', 'imageUUID', 'resourceUUID',
-                   'billingEntityUUID', 'sortOrder', 'disableEmulatedDevices',
+                   'billingEntityUUID', 'sortOrder', 'status',
                    'virtualizationType', 'resourceMetadata', 'clusterName',
                    'vmId', 'vdcName', 'serverCapabilities', 'initialUser',
                    'vdcUUID', 'deploymentInstanceName', 'lastModifiedTime',
@@ -4790,19 +4795,19 @@ class Server(ComplexObject):
     REQUIRED_ATTRIBS = {'serverCapabilities', 'clusterUUID',
                         'virtualizationType', 'resourceType', 'disks', 'vmId',
                         'sortOrder', 'vdcUUID', 'resourceName'}
-    OPTIONAL_ATTRIBS = {'disableEmulatedDevices', 'customerName', 'providers',
-                        'snapshotUUID', 'ram', 'billingEntityName',
-                        'resourceState', 'deploymentInstanceUUID',
-                        'productOfferUUID', 'nodeIP', 'resourceCreateDate',
-                        'productOfferName', 'nodeName', 'initialPassword',
-                        'nics', 'imagePermission', 'imageName', 'customerUUID',
-                        'imageUUID', 'resourceUUID', 'billingEntityUUID',
-                        'status', 'resourceMetadata', 'clusterName', 'vdcName',
-                        'initialUser', 'deploymentInstanceName',
-                        'lastModifiedTime', 'sshkeys', 'defaultSettings',
-                        'resourceKey', 'hypervisorSettings', 'serverKey',
-                        'nodeUUID', 'cpu'}
-    TYPES = {'disableEmulatedDevices': bool, 'customerName': str, 'providers':
+    OPTIONAL_ATTRIBS = {'status', 'customerName', 'providers', 'snapshotUUID',
+                        'ram', 'billingEntityName', 'resourceState',
+                        'deploymentInstanceUUID', 'productOfferUUID', 'nodeIP',
+                        'resourceCreateDate', 'productOfferName', 'nodeName',
+                        'initialPassword', 'nics', 'imagePermission',
+                        'imageName', 'customerUUID', 'imageUUID',
+                        'resourceUUID', 'billingEntityUUID',
+                        'disableEmulatedDevices', 'resourceMetadata',
+                        'clusterName', 'vdcName', 'initialUser',
+                        'deploymentInstanceName', 'lastModifiedTime',
+                        'sshkeys', 'defaultSettings', 'resourceKey',
+                        'hypervisorSettings', 'serverKey', 'nodeUUID', 'cpu'}
+    TYPES = {'status': enums.ServerStatus, 'customerName': str, 'providers':
              Dict(str, Dict(str, str)), 'snapshotUUID': str, 'ram': int,
              'billingEntityName': str, 'resourceState': enums.ResourceState,
              'deploymentInstanceUUID': str, 'resourceName': str,
@@ -4811,7 +4816,7 @@ class Server(ComplexObject):
              str, 'initialPassword': str, 'nics': List(Nic), 'imagePermission':
              ImagePermission, 'imageName': str, 'customerUUID': str,
              'imageUUID': str, 'resourceUUID': str, 'billingEntityUUID': str,
-             'sortOrder': int, 'status': enums.ServerStatus,
+             'sortOrder': int, 'disableEmulatedDevices': bool,
              'virtualizationType': enums.VirtualizationType,
              'resourceMetadata': ResourceMetadata, 'clusterName': str, 'vmId':
              int, 'vdcName': str, 'serverCapabilities':
@@ -4873,8 +4878,10 @@ class PaymentMethodInstance(ComplexObject):
             The metadata attached to the resource
         str billingEntityName (F):
             The Name of the Billing Entity to which the resource belongs
-        enums.ResourceState resourceState (F):
-            The state of the resource
+        datetime resourceCreateDate (F):
+            The creation date of the resource
+        str resourceUUID (F):
+            The UUID of the resource (read-only)
         bool nonInteractivePay (F):
             State if the payment method instance can support non-
             interactive payments
@@ -4884,45 +4891,44 @@ class PaymentMethodInstance(ComplexObject):
             The name of the resource
         str paymentMethodName (F):
             The name of the associated payment method
-        str resourceUUID (F):
-            The UUID of the resource (read-only)
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
         str billingEntityUUID (F):
             The UUID of the Billing Entity to which the resource belongs
-        int sortOrder (T):
-            The sort order value for the given resource
-        datetime resourceCreateDate (F):
-            The creation date of the resource
+        enums.ResourceState resourceState (F):
+            The state of the resource
         bool isDefault (F):
             State if this is the default payment method instance for the
             associated customer
+        int sortOrder (T):
+            The sort order value for the given resource
     """
 
     ALL_ATTRIBS = {'paymentMethodUUID', 'configuredValues', 'customerName',
-                   'providers', 'resourceType', 'isDefault', 'resourceKey',
+                   'providers', 'resourceType', 'resourceKey',
                    'resourceMetadata', 'billingEntityName', 'resourceState',
-                   'resourceUUID', 'nonInteractivePay', 'customerUUID',
-                   'paymentMethodName', 'resourceName', 'lastModifiedTime',
-                   'billingEntityUUID', 'resourceCreateDate', 'sortOrder'}
+                   'nonInteractivePay', 'customerUUID', 'resourceName',
+                   'paymentMethodName', 'resourceUUID', 'lastModifiedTime',
+                   'billingEntityUUID', 'sortOrder', 'resourceCreateDate',
+                   'isDefault'}
     REQUIRED_ATTRIBS = {'resourceType', 'paymentMethodUUID',
                         'configuredValues', 'sortOrder', 'resourceName'}
     OPTIONAL_ATTRIBS = {'customerName', 'providers', 'resourceKey',
                         'resourceMetadata', 'billingEntityName',
                         'resourceState', 'nonInteractivePay', 'customerUUID',
-                        'resourceCreateDate', 'paymentMethodName',
-                        'resourceUUID', 'lastModifiedTime',
-                        'billingEntityUUID', 'isDefault'}
+                        'resourceUUID', 'paymentMethodName',
+                        'lastModifiedTime', 'billingEntityUUID',
+                        'resourceCreateDate', 'isDefault'}
     TYPES = {'paymentMethodUUID': str, 'configuredValues': List(Value),
              'customerName': str, 'providers': Dict(str, Dict(str, str)),
-             'resourceType': enums.ResourceType, 'resourceKey':
-             List(ResourceKey), 'resourceMetadata': ResourceMetadata,
-             'billingEntityName': str, 'resourceState': enums.ResourceState,
-             'nonInteractivePay': bool, 'resourceName': str, 'customerUUID':
-             str, 'resourceCreateDate': datetime, 'paymentMethodName': str,
-             'resourceUUID': str, 'lastModifiedTime': int, 'billingEntityUUID':
-             str, 'isDefault': bool, 'sortOrder': int}
+             'resourceType': enums.ResourceType, 'isDefault': bool,
+             'resourceKey': List(ResourceKey), 'resourceMetadata':
+             ResourceMetadata, 'billingEntityName': str, 'resourceState':
+             enums.ResourceState, 'resourceUUID': str, 'nonInteractivePay':
+             bool, 'customerUUID': str, 'paymentMethodName': str,
+             'resourceName': str, 'lastModifiedTime': int, 'billingEntityUUID':
+             str, 'resourceCreateDate': datetime, 'sortOrder': int}
 
 
 class PaymentProvider(ComplexObject):
@@ -4946,8 +4952,8 @@ class PaymentProvider(ComplexObject):
             The config provider values
         enums.ResourceType resourceType (T):
             The type of the resource
-        str billingEntityUUID (F):
-            The UUID of the Billing Entity to which the resource belongs
+        str fdlName (T):
+            The name of the associated FDL code block
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
         ResourceMetadata resourceMetadata (F):
@@ -4963,15 +4969,15 @@ class PaymentProvider(ComplexObject):
             linked.
         enums.ResourceState resourceState (F):
             The state of the resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
-        str fdlName (T):
-            The name of the associated FDL code block
+        str billingEntityUUID (F):
+            The UUID of the Billing Entity to which the resource belongs
         datetime resourceCreateDate (F):
             The creation date of the resource
         int sortOrder (T):
@@ -4979,11 +4985,11 @@ class PaymentProvider(ComplexObject):
     """
 
     ALL_ATTRIBS = {'pmConfigurableList', 'fdlPaymentRef', 'description',
-                   'providers', 'resourceType', 'fdlName', 'resourceKey',
-                   'resourceMetadata', 'billingEntityName',
+                   'providers', 'resourceType', 'billingEntityUUID',
+                   'resourceKey', 'resourceMetadata', 'billingEntityName',
                    'pmiConfigurableList', 'fdlUUID', 'resourceState',
-                   'resourceUUID', 'resourceName', 'lastModifiedTime',
-                   'billingEntityUUID', 'resourceCreateDate', 'sortOrder'}
+                   'resourceName', 'resourceUUID', 'lastModifiedTime',
+                   'fdlName', 'resourceCreateDate', 'sortOrder'}
     REQUIRED_ATTRIBS = {'pmConfigurableList', 'fdlPaymentRef', 'description',
                         'resourceType', 'pmiConfigurableList', 'fdlUUID',
                         'sortOrder', 'resourceName', 'fdlName'}
@@ -4993,12 +4999,13 @@ class PaymentProvider(ComplexObject):
                         'resourceCreateDate'}
     TYPES = {'pmConfigurableList': List(Value), 'fdlPaymentRef': str,
              'description': str, 'providers': Dict(str, Dict(str, str)),
-             'resourceType': enums.ResourceType, 'billingEntityUUID': str,
-             'resourceKey': List(ResourceKey), 'resourceMetadata':
-             ResourceMetadata, 'billingEntityName': str, 'pmiConfigurableList':
-             List(Value), 'fdlUUID': str, 'resourceState': enums.ResourceState,
-             'resourceName': str, 'resourceUUID': str, 'lastModifiedTime': int,
-             'fdlName': str, 'resourceCreateDate': datetime, 'sortOrder': int}
+             'resourceType': enums.ResourceType, 'fdlName': str, 'resourceKey':
+             List(ResourceKey), 'resourceMetadata': ResourceMetadata,
+             'billingEntityName': str, 'pmiConfigurableList': List(Value),
+             'fdlUUID': str, 'resourceState': enums.ResourceState,
+             'resourceUUID': str, 'resourceName': str, 'lastModifiedTime': int,
+             'billingEntityUUID': str, 'resourceCreateDate': datetime,
+             'sortOrder': int}
 
 
 class MeasurementFunction(ComplexObject):
@@ -5010,14 +5017,14 @@ class MeasurementFunction(ComplexObject):
     Attributes (type name (required): description:
         enums.ResourceType associatedType (T):
             The measured type
-        str fdlUUID (T):
-            The UUID of the FDL Code Block that contains the function.
+        int waitTime (T):
+            The wait time
         Dict(str, Dict(str, str)) providers (F):
             The config provider values
         enums.ResourceType resourceType (T):
             The type of the resource
-        str billingEntityUUID (F):
-            The UUID of the Billing Entity to which the resource belongs
+        str fdlName (T):
+            The name of the FDL Code Block that contains the function
         str fdlDescription (T):
             The long form description of the FDL function.
         ResourceMetadata resourceMetadata (F):
@@ -5029,49 +5036,49 @@ class MeasurementFunction(ComplexObject):
         str extendedType (T):
             The pluggable provider type associated with Pluggable
             Resource measurement function
-        int waitTime (T):
-            The wait time
+        str fdlUUID (T):
+            The UUID of the FDL Code Block that contains the function.
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
-        Dict(str, Value) measuredValues (T):
-            A map of measured values
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        Dict(str, Value) measuredValues (T):
+            A map of measured values
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
-        str fdlName (T):
-            The name of the FDL Code Block that contains the function
+        str billingEntityUUID (F):
+            The UUID of the Billing Entity to which the resource belongs
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
         datetime resourceCreateDate (F):
             The creation date of the resource
     """
 
-    ALL_ATTRIBS = {'associatedType', 'waitTime', 'providers', 'resourceType',
-                   'fdlName', 'fdlDescription', 'resourceMetadata',
+    ALL_ATTRIBS = {'associatedType', 'fdlUUID', 'providers', 'resourceType',
+                   'billingEntityUUID', 'fdlDescription', 'resourceMetadata',
                    'billingEntityName', 'resourceState', 'extendedType',
-                   'fdlUUID', 'sortOrder', 'resourceUUID', 'measuredValues',
-                   'resourceName', 'lastModifiedTime', 'billingEntityUUID',
+                   'waitTime', 'sortOrder', 'resourceName', 'measuredValues',
+                   'resourceUUID', 'lastModifiedTime', 'fdlName',
                    'resourceKey', 'resourceCreateDate'}
-    REQUIRED_ATTRIBS = {'associatedType', 'fdlUUID', 'resourceType',
-                        'fdlDescription', 'extendedType', 'waitTime',
+    REQUIRED_ATTRIBS = {'associatedType', 'waitTime', 'resourceType',
+                        'fdlDescription', 'extendedType', 'fdlUUID',
                         'sortOrder', 'measuredValues', 'resourceName',
                         'fdlName'}
     OPTIONAL_ATTRIBS = {'providers', 'resourceKey', 'resourceMetadata',
                         'billingEntityName', 'resourceState', 'resourceUUID',
                         'lastModifiedTime', 'billingEntityUUID',
                         'resourceCreateDate'}
-    TYPES = {'associatedType': enums.ResourceType, 'fdlUUID': str, 'providers':
-             Dict(str, Dict(str, str)), 'resourceType': enums.ResourceType,
-             'billingEntityUUID': str, 'fdlDescription': str,
+    TYPES = {'associatedType': enums.ResourceType, 'waitTime': int,
+             'providers': Dict(str, Dict(str, str)), 'resourceType':
+             enums.ResourceType, 'fdlName': str, 'fdlDescription': str,
              'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
              'resourceState': enums.ResourceState, 'extendedType': str,
-             'waitTime': int, 'sortOrder': int, 'resourceName': str,
-             'measuredValues': Dict(str, Value), 'resourceUUID': str,
-             'lastModifiedTime': int, 'fdlName': str, 'resourceKey':
+             'fdlUUID': str, 'sortOrder': int, 'resourceUUID': str,
+             'measuredValues': Dict(str, Value), 'resourceName': str,
+             'lastModifiedTime': int, 'billingEntityUUID': str, 'resourceKey':
              List(ResourceKey), 'resourceCreateDate': datetime}
 
 
@@ -5085,11 +5092,13 @@ class MeasuredValue(ComplexObject):
         str measuredResourceName (F):
             The name of the resource from which the measurement was
             taken
-        enums.ResourceType resourceType (T):
-            The type of the resource
         int timestamp (T):
             The measurement timestamp (as a Unix time stamp, seconds
             from 1 Jan 1970)
+        enums.ResourceType resourceType (T):
+            The type of the resource
+        str billingEntityUUID (T):
+            The UUID of the billing entity owning the customer
         str measureKey (T):
             The unique name identifying the measurement taken and acting
             as a key
@@ -5103,13 +5112,11 @@ class MeasuredValue(ComplexObject):
             taken
         enums.MeasureType measurementType (T):
             The type of the measured value
-        str billingEntityUUID (T):
-            The UUID of the billing entity owning the customer
-        Value measurementAsValue (T):
-            The measured value
         enums.ResourceType measuredResourceType (F):
             The type of the resource from which the measurement was
             taken
+        Value measurementAsValue (T):
+            The measured value
     """
 
     ALL_ATTRIBS = {'measuredResourceName', 'resourceType', 'timestamp',
@@ -5135,8 +5142,8 @@ class BillingMethod(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        Dict(str, Dict(str, str)) providers (F):
-            The config provider values
+        ResourceMetadata resourceMetadata (F):
+            The metadata attached to the resource
         str description (F):
             Longform description of the billing method, populated from
             the FDL code block.
@@ -5145,12 +5152,12 @@ class BillingMethod(ComplexObject):
             field cannot be selected using FQL
         enums.ResourceType resourceType (T):
             The type of the resource
-        str billingEntityUUID (F):
-            The UUID of the Billing Entity to which the resource belongs
+        str fdlName (T):
+            The name of the FDL Code Block that contains the function
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
-        ResourceMetadata resourceMetadata (F):
-            The metadata attached to the resource
+        Dict(str, Dict(str, str)) providers (F):
+            The config provider values
         str billingEntityName (F):
             The Name of the Billing Entity to which the resource belongs
         enums.ResourceState resourceState (F):
@@ -5160,39 +5167,38 @@ class BillingMethod(ComplexObject):
             linked.
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
-        str fdlName (T):
-            The name of the FDL Code Block that contains the function
+        str billingEntityUUID (F):
+            The UUID of the Billing Entity to which the resource belongs
         datetime resourceCreateDate (F):
             The creation date of the resource
     """
 
-    ALL_ATTRIBS = {'resourceMetadata', 'description', 'configurableList',
-                   'resourceType', 'fdlName', 'resourceKey', 'providers',
-                   'billingEntityName', 'resourceState', 'fdlUUID',
-                   'sortOrder', 'resourceUUID', 'resourceName',
-                   'lastModifiedTime', 'billingEntityUUID',
-                   'resourceCreateDate'}
+    ALL_ATTRIBS = {'providers', 'description', 'configurableList',
+                   'resourceType', 'billingEntityUUID', 'resourceKey',
+                   'resourceMetadata', 'billingEntityName', 'resourceState',
+                   'fdlUUID', 'sortOrder', 'resourceName', 'resourceUUID',
+                   'lastModifiedTime', 'fdlName', 'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'configurableList', 'resourceType', 'fdlUUID',
                         'sortOrder', 'resourceName', 'fdlName'}
     OPTIONAL_ATTRIBS = {'description', 'providers', 'resourceKey',
                         'resourceMetadata', 'billingEntityName',
                         'resourceState', 'resourceUUID', 'lastModifiedTime',
                         'billingEntityUUID', 'resourceCreateDate'}
-    TYPES = {'providers': Dict(str, Dict(str, str)), 'description': str,
+    TYPES = {'resourceMetadata': ResourceMetadata, 'description': str,
              'configurableList': List(Value), 'resourceType':
-             enums.ResourceType, 'billingEntityUUID': str, 'resourceKey':
-             List(ResourceKey), 'resourceMetadata': ResourceMetadata,
+             enums.ResourceType, 'fdlName': str, 'resourceKey':
+             List(ResourceKey), 'providers': Dict(str, Dict(str, str)),
              'billingEntityName': str, 'resourceState': enums.ResourceState,
-             'fdlUUID': str, 'sortOrder': int, 'resourceName': str,
-             'resourceUUID': str, 'lastModifiedTime': int, 'fdlName': str,
-             'resourceCreateDate': datetime}
+             'fdlUUID': str, 'sortOrder': int, 'resourceUUID': str,
+             'resourceName': str, 'lastModifiedTime': int, 'billingEntityUUID':
+             str, 'resourceCreateDate': datetime}
 
 
 class PaymentMethod(ComplexObject):
@@ -5229,10 +5235,10 @@ class PaymentMethod(ComplexObject):
             The list configurable values which need to configured when
             you are creating PaymentMethodInstace from this
             PaymentMethod
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -5251,8 +5257,8 @@ class PaymentMethod(ComplexObject):
     ALL_ATTRIBS = {'fdlPaymentRef', 'paymentProviderName', 'providers',
                    'resourceType', 'configured', 'resourceMetadata',
                    'billingEntityName', 'configuredValues', 'resourceState',
-                   'consolidateInvoices', 'instanceValues', 'resourceUUID',
-                   'resourceName', 'lastModifiedTime', 'paymentProviderUUID',
+                   'consolidateInvoices', 'instanceValues', 'resourceName',
+                   'resourceUUID', 'lastModifiedTime', 'paymentProviderUUID',
                    'billingEntityUUID', 'resourceKey', 'resourceCreateDate',
                    'sortOrder'}
     REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'paymentProviderUUID',
@@ -5269,8 +5275,8 @@ class PaymentMethod(ComplexObject):
              'configured': bool, 'resourceMetadata': ResourceMetadata,
              'billingEntityName': str, 'configuredValues': List(Value),
              'resourceState': enums.ResourceState, 'consolidateInvoices': bool,
-             'instanceValues': List(Value), 'resourceName': str,
-             'resourceUUID': str, 'lastModifiedTime': int,
+             'instanceValues': List(Value), 'resourceUUID': str,
+             'resourceName': str, 'lastModifiedTime': int,
              'paymentProviderUUID': str, 'billingEntityUUID': str,
              'resourceKey': List(ResourceKey), 'resourceCreateDate': datetime,
              'sortOrder': int}
@@ -5297,10 +5303,8 @@ class Cluster(ComplexObject):
             The Name of the Billing Entity to which the resource belongs
         enums.ResourceState resourceState (F):
             The state of the resource
-        bool fetchDiskSupport (F):
-            Indicate if the cluster supports fetching disks
-        str macAddressPrefix (T):
-            The mac address prefix for the cluster
+        bool createDefaultVDC (T):
+            To create a default VDC on creation of a customer
         int clusterPort (T):
             The port for the service
         str resourceName (T):
@@ -5322,16 +5326,16 @@ class Cluster(ComplexObject):
             The UUID of the Billing Entity to which the resource belongs
         str username (T):
             The usename for the XVP service
-        bool ucsIntegration (T):
-            The type of integration used by the cluster - 0 - none, 1 -
-            UCS
+        str vlanRestrictedOuterTags (T):
+            The tags which are restricted in QinQ mode - a comma
+            seperated list
         bool isoDetachSupport (F):
             Indicate if an ISO disk can be detached from a server
         int vlanStartOuterTag (T):
             When VLAN allocation is runing in the QinQ mode this will be
             used as the start tag
-        bool createDefaultVDC (T):
-            To create a default VDC on creation of a customer
+        bool fetchDiskSupport (F):
+            Indicate if the cluster supports fetching disks
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -5339,15 +5343,17 @@ class Cluster(ComplexObject):
             The password for the XVP service
         List(HypervisorSetting) defaultSettings (T):
             The combined default and cluster hypervisor settings
-        str vlanRestrictedOuterTags (T):
-            The tags which are restricted in QinQ mode - a comma
-            seperated list
+        bool ucsIntegration (T):
+            The type of integration used by the cluster - 0 - none, 1 -
+            UCS
+        int vlanStartInnerTag (T):
+            The minimum VLAN tag to be allocated
         SystemCapabilitySet systemCapabilities (T):
             The capabilities of the cluster
         enums.ResourceType resourceType (T):
             The type of the resource
-        int vlanStartInnerTag (T):
-            The minimum VLAN tag to be allocated
+        enums.HypervisorType hypervisor (T):
+            The hypervisor of the cluster
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
         List(HypervisorSetting) hypervisorSettings (T):
@@ -5356,63 +5362,64 @@ class Cluster(ComplexObject):
             The maximum VLAN tag to be allocated
         int vlanEndOuterTag (T):
             In the QinQ mode maximum outer tag which can be allocated
-        enums.HypervisorType hypervisor (T):
-            The hypervisor of the cluster
+        str macAddressPrefix (T):
+            The mac address prefix for the cluster
         bool fetchServerSupport (F):
             Indicate if the cluster supports fetching servers
-        bool fetchISOSupport (F):
-            Indicate if the cluster supports fetching ISO
         bool ctSupport (F):
             Indicate if the cluster supports containers
+        bool fetchISOSupport (F):
+            Indicate if the cluster supports fetching ISO
     """
 
     ALL_ATTRIBS = {'diskDetachSupport', 'providers', 'vlanRestrictedInnerTags',
                    'vmSupport', 'resourceMetadata', 'billingEntityName',
-                   'resourceState', 'createDefaultVDC', 'clusterPort',
-                   'resourceName', 'hypervisorConfig', 'hypervisor',
+                   'resourceState', 'fetchDiskSupport', 'macAddressPrefix',
+                   'clusterPort', 'resourceName', 'hypervisorConfig',
                    'resourceCreateDate', 'vlanQinQmode', 'sortOrder',
                    'clusterIP', 'resourceUUID', 'billingEntityUUID',
-                   'username', 'vlanRestrictedOuterTags', 'isoDetachSupport',
-                   'vlanStartOuterTag', 'fetchDiskSupport', 'lastModifiedTime',
-                   'password', 'defaultSettings', 'ucsIntegration',
+                   'username', 'ucsIntegration', 'isoDetachSupport',
+                   'vlanStartOuterTag', 'createDefaultVDC', 'lastModifiedTime',
+                   'password', 'defaultSettings', 'vlanRestrictedOuterTags',
                    'systemCapabilities', 'resourceType', 'vlanStartInnerTag',
                    'resourceKey', 'hypervisorSettings', 'vlanEndInnerTag',
-                   'vlanEndOuterTag', 'macAddressPrefix', 'fetchServerSupport',
-                   'ctSupport', 'fetchISOSupport'}
+                   'vlanEndOuterTag', 'hypervisor', 'fetchServerSupport',
+                   'fetchISOSupport', 'ctSupport'}
     REQUIRED_ATTRIBS = {'vlanRestrictedInnerTags', 'clusterPort',
-                        'hypervisorConfig', 'resourceName', 'vlanQinQmode',
+                        'resourceName', 'hypervisorConfig', 'vlanQinQmode',
                         'sortOrder', 'clusterIP', 'vlanStartInnerTag',
-                        'username', 'ucsIntegration', 'vlanStartOuterTag',
-                        'createDefaultVDC', 'password', 'defaultSettings',
-                        'vlanRestrictedOuterTags', 'systemCapabilities',
-                        'resourceType', 'hypervisor', 'hypervisorSettings',
-                        'vlanEndInnerTag', 'vlanEndOuterTag',
-                        'macAddressPrefix'}
+                        'username', 'vlanRestrictedOuterTags',
+                        'vlanStartOuterTag', 'createDefaultVDC', 'password',
+                        'defaultSettings', 'ucsIntegration',
+                        'systemCapabilities', 'resourceType', 'hypervisor',
+                        'hypervisorSettings', 'vlanEndInnerTag',
+                        'vlanEndOuterTag', 'macAddressPrefix'}
     OPTIONAL_ATTRIBS = {'diskDetachSupport', 'isoDetachSupport', 'providers',
                         'vmSupport', 'resourceKey', 'resourceMetadata',
                         'billingEntityName', 'resourceState',
                         'fetchServerSupport', 'fetchDiskSupport',
-                        'resourceUUID', 'lastModifiedTime', 'fetchISOSupport',
-                        'billingEntityUUID', 'resourceCreateDate', 'ctSupport'}
+                        'resourceUUID', 'lastModifiedTime', 'ctSupport',
+                        'billingEntityUUID', 'resourceCreateDate',
+                        'fetchISOSupport'}
     TYPES = {'diskDetachSupport': bool, 'providers':
              Dict(str, Dict(str, str)), 'vlanRestrictedInnerTags': str,
              'vmSupport': bool, 'resourceMetadata': ResourceMetadata,
              'billingEntityName': str, 'resourceState': enums.ResourceState,
-             'fetchDiskSupport': bool, 'clusterPort': int, 'resourceName': str,
-             'hypervisorConfig': HypervisorConfig, 'resourceCreateDate':
-             datetime, 'vlanQinQmode': bool, 'sortOrder': int, 'clusterIP':
-             str, 'resourceUUID': str, 'billingEntityUUID': str, 'username':
-             str, 'ucsIntegration': bool, 'isoDetachSupport': bool,
-             'vlanStartOuterTag': int, 'createDefaultVDC': bool,
+             'createDefaultVDC': bool, 'clusterPort': int, 'resourceName': str,
+             'hypervisorConfig': HypervisorConfig, 'hypervisor':
+             enums.HypervisorType, 'resourceCreateDate': datetime,
+             'vlanQinQmode': bool, 'sortOrder': int, 'clusterIP': str,
+             'resourceUUID': str, 'billingEntityUUID': str, 'username': str,
+             'vlanRestrictedOuterTags': str, 'isoDetachSupport': bool,
+             'vlanStartOuterTag': int, 'fetchDiskSupport': bool,
              'lastModifiedTime': int, 'password': str, 'defaultSettings':
-             List(HypervisorSetting), 'vlanRestrictedOuterTags': str,
+             List(HypervisorSetting), 'ucsIntegration': bool,
              'systemCapabilities': SystemCapabilitySet, 'resourceType':
-             enums.ResourceType, 'hypervisor': enums.HypervisorType,
-             'resourceKey': List(ResourceKey), 'hypervisorSettings':
-             List(HypervisorSetting), 'fetchISOSupport': bool,
+             enums.ResourceType, 'vlanStartInnerTag': int, 'resourceKey':
+             List(ResourceKey), 'hypervisorSettings': List(HypervisorSetting),
              'vlanEndInnerTag': int, 'vlanEndOuterTag': int,
              'macAddressPrefix': str, 'fetchServerSupport': bool, 'ctSupport':
-             bool, 'vlanStartInnerTag': int}
+             bool, 'fetchISOSupport': bool}
 
 
 class ProductComponentType(ComplexObject):
@@ -5425,8 +5432,8 @@ class ProductComponentType(ComplexObject):
         Dict(str, ActionDefinition) actionFunctions (F):
             Action definitions for use of resources configured by this
             product component type
-        Dict(str, Dict(str, str)) providers (F):
-            The config provider values
+        ResourceMetadata resourceMetadata (F):
+            The metadata attached to the resource
         bool isOptional (F):
             State if the PCT is optional, and if a Product Offer must
             complete it's required fields.
@@ -5436,8 +5443,8 @@ class ProductComponentType(ComplexObject):
             The type of the resource
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
-        ResourceMetadata resourceMetadata (F):
-            The metadata attached to the resource
+        Dict(str, Dict(str, str)) providers (F):
+            The config provider values
         str billingEntityName (F):
             The Name of the Billing Entity to which the resource belongs
         enums.ResourceState resourceState (F):
@@ -5446,10 +5453,10 @@ class ProductComponentType(ComplexObject):
             A list of Measured Values for the PCT
         int sortOrder (T):
             The sort order value for the given resource
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -5461,10 +5468,10 @@ class ProductComponentType(ComplexObject):
             The creation date of the resource
     """
 
-    ALL_ATTRIBS = {'actionFunctions', 'resourceMetadata', 'isOptional',
+    ALL_ATTRIBS = {'actionFunctions', 'providers', 'isOptional',
                    'configurableList', 'resourceType', 'resourceKey',
-                   'providers', 'billingEntityName', 'resourceState',
-                   'measuredList', 'sortOrder', 'resourceUUID', 'resourceName',
+                   'resourceMetadata', 'billingEntityName', 'resourceState',
+                   'measuredList', 'sortOrder', 'resourceName', 'resourceUUID',
                    'lastModifiedTime', 'referenceField', 'billingEntityUUID',
                    'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'configurableList', 'resourceType', 'measuredList',
@@ -5473,13 +5480,13 @@ class ProductComponentType(ComplexObject):
                         'resourceKey', 'resourceMetadata', 'billingEntityName',
                         'resourceState', 'resourceUUID', 'lastModifiedTime',
                         'billingEntityUUID', 'resourceCreateDate'}
-    TYPES = {'actionFunctions': Dict(str, ActionDefinition), 'providers':
-             Dict(str, Dict(str, str)), 'isOptional': bool,
+    TYPES = {'actionFunctions': Dict(str, ActionDefinition),
+             'resourceMetadata': ResourceMetadata, 'isOptional': bool,
              'configurableList': List(Value), 'resourceType':
-             enums.ResourceType, 'resourceKey': List(ResourceKey),
-             'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
+             enums.ResourceType, 'resourceKey': List(ResourceKey), 'providers':
+             Dict(str, Dict(str, str)), 'billingEntityName': str,
              'resourceState': enums.ResourceState, 'measuredList': List(Value),
-             'sortOrder': int, 'resourceName': str, 'resourceUUID': str,
+             'sortOrder': int, 'resourceUUID': str, 'resourceName': str,
              'lastModifiedTime': int, 'referenceField': str,
              'billingEntityUUID': str, 'resourceCreateDate': datetime}
 
@@ -5536,11 +5543,11 @@ class PluggableResource(ComplexObject):
         str providerUUID (T):
             The UUID of Pluggable Resource Providerk that defined the
             Pluggable Resource
-        bool canDelete (F):
-            State if the user can delete this resource
         str providerName (F):
             The name of the Pluggable Resource Provider that defined the
             Pluggable Resource
+        bool canDelete (F):
+            State if the user can delete this resource
         enums.ResourceType resourceType (T):
             The type of the resource
         List(ResourceKey) resourceKey (F):
@@ -5558,18 +5565,18 @@ class PluggableResource(ComplexObject):
                    'providerActionDefinitions', 'providerGroup',
                    'customerUUID', 'resourceUUID', 'billingEntityUUID',
                    'sortOrder', 'providerType', 'lastModifiedTime',
-                   'providerUUID', 'providerName', 'canDelete', 'resourceType',
+                   'providerUUID', 'canDelete', 'providerName', 'resourceType',
                    'resourceKey', 'canModify', 'canCreate'}
     REQUIRED_ATTRIBS = {'resourceValues', 'resourceName', 'providerUUID',
                         'resourceType', 'sortOrder'}
     OPTIONAL_ATTRIBS = {'productOfferName', 'providerType', 'customerName',
-                        'providerName', 'providers', 'canDelete',
-                        'resourceKey', 'resourceMetadata', 'billingEntityName',
+                        'canDelete', 'providers', 'resourceKey',
+                        'resourceMetadata', 'billingEntityName',
                         'resourceState', 'providerActionDefinitions',
                         'providerGroup', 'providerIcon', 'customerUUID',
                         'canModify', 'productOfferUUID', 'resourceUUID',
                         'lastModifiedTime', 'canCreate', 'billingEntityUUID',
-                        'resourceCreateDate'}
+                        'providerName', 'resourceCreateDate'}
     TYPES = {'customerName': str, 'providers': Dict(str, Dict(str, str)),
              'resourceMetadata': ResourceMetadata, 'billingEntityName': str,
              'resourceState': enums.ResourceState, 'resourceValues':
@@ -5579,7 +5586,7 @@ class PluggableResource(ComplexObject):
              Dict(str, ActionDefinition), 'providerGroup': str,
              'customerUUID': str, 'resourceUUID': str, 'billingEntityUUID':
              str, 'sortOrder': int, 'providerType': str, 'lastModifiedTime':
-             int, 'providerUUID': str, 'canDelete': bool, 'providerName': str,
+             int, 'providerUUID': str, 'providerName': str, 'canDelete': bool,
              'resourceType': enums.ResourceType, 'resourceKey':
              List(ResourceKey), 'canModify': bool, 'canCreate': bool}
 
@@ -5624,19 +5631,19 @@ class DeploymentTemplate(ComplexObject):
             The UUID of the cluster in which the resource is located
         List(Network) network (F):
             Holds the list of networks in a template
-        TemplateProtectionPermission userPermission (F):
-            The user template permissions
+        List(VDC) vdc (F):
+            Holds the list of vdcs in a template
         str deploymentInstanceName (F):
             The name of the deployment instance the resource is created
             from
-        int sortOrder (T):
-            The sort order value for the given resource
+        str customerUUID (F):
+            The UUID of the customer that owns the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
         str billingEntityUUID (F):
             The UUID of the Billing Entity to which the resource belongs
-        str customerUUID (F):
-            The UUID of the customer that owns the resource
+        int sortOrder (T):
+            The sort order value for the given resource
         str clusterName (F):
             The name of the cluster in which the resource is located
         str instanceChargeProductOfferName (F):
@@ -5665,8 +5672,8 @@ class DeploymentTemplate(ComplexObject):
             template has been published to
         List(Server) server (F):
             Holds the list of servers in a template
-        List(VDC) vdc (F):
-            Holds the list of vdcs in a template
+        TemplateProtectionPermission userPermission (F):
+            The user template permissions
     """
 
     ALL_ATTRIBS = {'customerName', 'providers', 'firewall', 'resourceMetadata',
@@ -5674,13 +5681,14 @@ class DeploymentTemplate(ComplexObject):
                    'deploymentInstanceUUID', 'questions', 'vdcUUID',
                    'productOfferUUID', 'resourceName', 'disk',
                    'resourceCreateDate', 'productOfferName', 'clusterUUID',
-                   'network', 'vdc', 'deploymentInstanceName', 'customerUUID',
-                   'resourceUUID', 'billingEntityUUID', 'sortOrder',
-                   'clusterName', 'instanceChargeProductOfferName', 'vdcName',
+                   'network', 'userPermission', 'deploymentInstanceName',
+                   'sortOrder', 'resourceUUID', 'billingEntityUUID',
+                   'customerUUID', 'clusterName',
+                   'instanceChargeProductOfferName', 'vdcName',
                    'resourceState', 'ownerPermission', 'lastModifiedTime',
                    'sshkey', 'resourceType', 'resourceKey',
                    'instanceChargeProductOfferUUID', 'publishedTo', 'server',
-                   'userPermission'}
+                   'vdc'}
     REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'clusterUUID',
                         'sortOrder', 'vdcUUID'}
     OPTIONAL_ATTRIBS = {'customerName', 'providers', 'firewall',
@@ -5688,13 +5696,13 @@ class DeploymentTemplate(ComplexObject):
                         'firewallTemplate', 'deploymentInstanceUUID',
                         'questions', 'productOfferUUID', 'disk',
                         'resourceCreateDate', 'productOfferName', 'network',
-                        'userPermission', 'deploymentInstanceName',
-                        'customerUUID', 'resourceUUID', 'billingEntityUUID',
-                        'clusterName', 'instanceChargeProductOfferName',
-                        'vdcName', 'resourceState', 'ownerPermission',
-                        'lastModifiedTime', 'sshkey', 'resourceKey',
+                        'vdc', 'deploymentInstanceName', 'customerUUID',
+                        'resourceUUID', 'billingEntityUUID', 'clusterName',
+                        'instanceChargeProductOfferName', 'vdcName',
+                        'resourceState', 'ownerPermission', 'lastModifiedTime',
+                        'sshkey', 'resourceKey',
                         'instanceChargeProductOfferUUID', 'publishedTo',
-                        'server', 'vdc'}
+                        'server', 'userPermission'}
     TYPES = {'customerName': str, 'providers': Dict(str, Dict(str, str)),
              'firewall': List(Firewall), 'resourceMetadata': ResourceMetadata,
              'billingEntityName': str, 'firewallTemplate':
@@ -5702,17 +5710,17 @@ class DeploymentTemplate(ComplexObject):
              'questions': List(Question), 'vdcUUID': str, 'productOfferUUID':
              str, 'resourceName': str, 'disk': List(Disk),
              'resourceCreateDate': datetime, 'productOfferName': str,
-             'clusterUUID': str, 'network': List(Network), 'userPermission':
-             TemplateProtectionPermission, 'deploymentInstanceName': str,
-             'sortOrder': int, 'resourceUUID': str, 'billingEntityUUID': str,
-             'customerUUID': str, 'clusterName': str,
-             'instanceChargeProductOfferName': str, 'vdcName': str,
-             'resourceState': enums.ResourceState, 'ownerPermission':
-             TemplateProtectionPermission, 'lastModifiedTime': int, 'sshkey':
-             List(SSHKey), 'resourceType': enums.ResourceType, 'resourceKey':
-             List(ResourceKey), 'instanceChargeProductOfferUUID': str,
-             'publishedTo': List(PublishTo), 'server': List(Server), 'vdc':
-             List(VDC)}
+             'clusterUUID': str, 'network': List(Network), 'vdc': List(VDC),
+             'deploymentInstanceName': str, 'customerUUID': str,
+             'resourceUUID': str, 'billingEntityUUID': str, 'sortOrder': int,
+             'clusterName': str, 'instanceChargeProductOfferName': str,
+             'vdcName': str, 'resourceState': enums.ResourceState,
+             'ownerPermission': TemplateProtectionPermission,
+             'lastModifiedTime': int, 'sshkey': List(SSHKey), 'resourceType':
+             enums.ResourceType, 'resourceKey': List(ResourceKey),
+             'instanceChargeProductOfferUUID': str, 'publishedTo':
+             List(PublishTo), 'server': List(Server), 'userPermission':
+             TemplateProtectionPermission}
 
 
 class DeploymentInstance(ComplexObject):
@@ -5758,8 +5766,8 @@ class DeploymentInstance(ComplexObject):
             The UUID of the cluster in which the resource is located
         List(Network) network (F):
             Holds the list of networks in a template
-        TemplateProtectionPermission userPermission (F):
-            The user template permissions
+        List(VDC) vdc (F):
+            Holds the list of vdcs in a template
         str deploymentInstanceName (F):
             The name of the deployment instance the resource is created
             from
@@ -5803,8 +5811,8 @@ class DeploymentInstance(ComplexObject):
             template has been published to
         List(Server) server (F):
             Holds the list of servers in a template
-        List(VDC) vdc (F):
-            Holds the list of vdcs in a template
+        TemplateProtectionPermission userPermission (F):
+            The user template permissions
         str deploymentTemplateName (F):
             The name of the template from which its been instantiated
     """
@@ -5814,14 +5822,15 @@ class DeploymentInstance(ComplexObject):
                    'deploymentInstanceUUID', 'questions', 'vdcUUID',
                    'productOfferUUID', 'resourceName', 'disk',
                    'resourceCreateDate', 'deploymentTemplateUUID',
-                   'clusterUUID', 'network', 'vdc', 'deploymentInstanceName',
-                   'customerUUID', 'resourceUUID', 'billingEntityUUID',
-                   'sortOrder', 'status', 'productOfferName', 'clusterName',
+                   'clusterUUID', 'network', 'userPermission',
+                   'deploymentInstanceName', 'customerUUID', 'resourceUUID',
+                   'billingEntityUUID', 'sortOrder', 'status',
+                   'productOfferName', 'clusterName',
                    'instanceChargeProductOfferName', 'vdcName',
                    'resourceState', 'ownerPermission', 'lastModifiedTime',
                    'sshkey', 'resourceType', 'resourceKey',
                    'instanceChargeProductOfferUUID', 'publishedTo', 'server',
-                   'userPermission', 'deploymentTemplateName'}
+                   'vdc', 'deploymentTemplateName'}
     REQUIRED_ATTRIBS = {'resourceType', 'resourceName', 'clusterUUID',
                         'sortOrder', 'vdcUUID'}
     OPTIONAL_ATTRIBS = {'customerName', 'providers', 'firewall',
@@ -5829,7 +5838,7 @@ class DeploymentInstance(ComplexObject):
                         'firewallTemplate', 'templateKey',
                         'deploymentInstanceUUID', 'questions',
                         'productOfferUUID', 'disk', 'resourceCreateDate',
-                        'deploymentTemplateUUID', 'network', 'userPermission',
+                        'deploymentTemplateUUID', 'network', 'vdc',
                         'deploymentInstanceName', 'customerUUID',
                         'resourceUUID', 'billingEntityUUID', 'status',
                         'productOfferName', 'clusterName',
@@ -5837,7 +5846,7 @@ class DeploymentInstance(ComplexObject):
                         'resourceState', 'ownerPermission', 'lastModifiedTime',
                         'sshkey', 'resourceKey',
                         'instanceChargeProductOfferUUID', 'publishedTo',
-                        'server', 'vdc', 'deploymentTemplateName'}
+                        'server', 'userPermission', 'deploymentTemplateName'}
     TYPES = {'customerName': str, 'providers': Dict(str, Dict(str, str)),
              'firewall': List(Firewall), 'resourceMetadata': ResourceMetadata,
              'billingEntityName': str, 'firewallTemplate':
@@ -5846,17 +5855,17 @@ class DeploymentInstance(ComplexObject):
              'vdcUUID': str, 'productOfferUUID': str, 'resourceName': str,
              'disk': List(Disk), 'resourceCreateDate': datetime,
              'deploymentTemplateUUID': str, 'clusterUUID': str, 'network':
-             List(Network), 'userPermission': TemplateProtectionPermission,
-             'deploymentInstanceName': str, 'customerUUID': str,
-             'resourceUUID': str, 'billingEntityUUID': str, 'sortOrder': int,
-             'status': enums.DeploymentInstanceStatus, 'productOfferName': str,
-             'clusterName': str, 'instanceChargeProductOfferName': str,
-             'vdcName': str, 'resourceState': enums.ResourceState,
-             'ownerPermission': TemplateProtectionPermission,
-             'lastModifiedTime': int, 'sshkey': List(SSHKey), 'resourceType':
-             enums.ResourceType, 'resourceKey': List(ResourceKey),
-             'instanceChargeProductOfferUUID': str, 'publishedTo':
-             List(PublishTo), 'server': List(Server), 'vdc': List(VDC),
+             List(Network), 'vdc': List(VDC), 'deploymentInstanceName': str,
+             'customerUUID': str, 'resourceUUID': str, 'billingEntityUUID':
+             str, 'sortOrder': int, 'status': enums.DeploymentInstanceStatus,
+             'productOfferName': str, 'clusterName': str,
+             'instanceChargeProductOfferName': str, 'vdcName': str,
+             'resourceState': enums.ResourceState, 'ownerPermission':
+             TemplateProtectionPermission, 'lastModifiedTime': int, 'sshkey':
+             List(SSHKey), 'resourceType': enums.ResourceType, 'resourceKey':
+             List(ResourceKey), 'instanceChargeProductOfferUUID': str,
+             'publishedTo': List(PublishTo), 'server': List(Server),
+             'userPermission': TemplateProtectionPermission,
              'deploymentTemplateName': str}
 
 
@@ -5880,11 +5889,10 @@ class ProductPurchase(ComplexObject):
             The date/time the product purchase was made
         datetime lastBillPeriod (F):
             The end date/time of the last billing period
-        int instanceKey (F):
-            A field to help managing billing of products purchased
-        bool active (F):
-            A flag indicating whether the product purchase is currently
-            active
+        datetime nextBillPeriod (F):
+            The start date/time of the next billing period
+        str productOfferUUID (T):
+            The UUID of the associated product offer
         str referenceUUID (F):
             The UUID of the product purchase (deprecated please use
             purchaseUUID )
@@ -5895,8 +5903,9 @@ class ProductPurchase(ComplexObject):
             purchase
         str vdcUUID (F):
             The UUID of the VDC associated with the product purchase
-        str productOfferUUID (T):
-            The UUID of the associated product offer
+        bool active (F):
+            A flag indicating whether the product purchase is currently
+            active
         str resourceUUID (T):
             The UUID of the resource associated with the product
             purchase
@@ -5906,32 +5915,31 @@ class ProductPurchase(ComplexObject):
         str billingEntityUUID (F):
             The UUID of the billing entity associated with the product
             purchase
-        datetime nextBillPeriod (F):
-            The start date/time of the next billing period
+        int instanceKey (F):
+            A field to help managing billing of products purchased
         int productID (F):
             The underlying productid of the product offer which linked
             with the current purchase
     """
 
     ALL_ATTRIBS = {'donotRebill', 'endDate', 'description', 'startDate',
-                   'purchaseDate', 'lastBillPeriod', 'nextBillPeriod',
-                   'productOfferUUID', 'referenceUUID', 'purchaseUUID',
-                   'customerUUID', 'vdcUUID', 'active', 'resourceUUID',
-                   'purchasedConfig', 'billingEntityUUID', 'instanceKey',
-                   'productID'}
+                   'purchaseDate', 'lastBillPeriod', 'instanceKey', 'active',
+                   'referenceUUID', 'purchaseUUID', 'customerUUID', 'vdcUUID',
+                   'productOfferUUID', 'resourceUUID', 'purchasedConfig',
+                   'billingEntityUUID', 'nextBillPeriod', 'productID'}
     REQUIRED_ATTRIBS = {'donotRebill', 'startDate', 'purchaseDate',
                         'customerUUID', 'productOfferUUID', 'resourceUUID'}
     OPTIONAL_ATTRIBS = {'endDate', 'description', 'lastBillPeriod',
-                        'instanceKey', 'referenceUUID', 'purchaseUUID',
+                        'nextBillPeriod', 'referenceUUID', 'purchaseUUID',
                         'vdcUUID', 'active', 'purchasedConfig',
-                        'billingEntityUUID', 'nextBillPeriod', 'productID'}
+                        'billingEntityUUID', 'instanceKey', 'productID'}
     TYPES = {'donotRebill': bool, 'endDate': datetime, 'description': str,
              'startDate': datetime, 'purchaseDate': datetime, 'lastBillPeriod':
-             datetime, 'instanceKey': int, 'active': bool, 'referenceUUID':
-             str, 'purchaseUUID': str, 'customerUUID': str, 'vdcUUID': str,
-             'productOfferUUID': str, 'resourceUUID': str, 'purchasedConfig':
-             List(ProductComponent), 'billingEntityUUID': str,
-             'nextBillPeriod': datetime, 'productID': int}
+             datetime, 'nextBillPeriod': datetime, 'productOfferUUID': str,
+             'referenceUUID': str, 'purchaseUUID': str, 'customerUUID': str,
+             'vdcUUID': str, 'active': bool, 'resourceUUID': str,
+             'purchasedConfig': List(ProductComponent), 'billingEntityUUID':
+             str, 'instanceKey': int, 'productID': int}
 
 
 class UnitTransaction(ComplexObject):
@@ -6028,8 +6036,8 @@ class Product(ComplexObject):
         enums.ResourceType associatedType (T):
             The associated resource type (or pseudo-resource type) that
             the product builds when purchased
-        Dict(str, Dict(str, str)) providers (F):
-            The config provider values
+        ResourceMetadata resourceMetadata (F):
+            The metadata attached to the resource
         bool isEditable (F):
             This indicates if the Product is editable
         bool inUse (F):
@@ -6038,8 +6046,8 @@ class Product(ComplexObject):
             The type of the resource
         List(ResourceKey) resourceKey (F):
             The keys attached to the resource
-        ResourceMetadata resourceMetadata (F):
-            The metadata attached to the resource
+        Dict(str, Dict(str, str)) providers (F):
+            The config provider values
         str billingEntityName (F):
             The Name of the Billing Entity to which the resource belongs
         enums.ResourceState resourceState (F):
@@ -6052,10 +6060,10 @@ class Product(ComplexObject):
         List(ProductComponentType) components (T):
             List of Product Component Types that together comprise the
             product
-        str resourceName (T):
-            The name of the resource
         str resourceUUID (F):
             The UUID of the resource (read-only)
+        str resourceName (T):
+            The name of the resource
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -6065,26 +6073,25 @@ class Product(ComplexObject):
             The creation date of the resource
     """
 
-    ALL_ATTRIBS = {'associatedType', 'resourceMetadata', 'isEditable', 'inUse',
-                   'resourceType', 'resourceKey', 'providers',
+    ALL_ATTRIBS = {'associatedType', 'providers', 'isEditable', 'inUse',
+                   'resourceType', 'resourceKey', 'resourceMetadata',
                    'billingEntityName', 'resourceState', 'extendedType',
-                   'sortOrder', 'components', 'resourceUUID', 'resourceName',
+                   'sortOrder', 'components', 'resourceName', 'resourceUUID',
                    'lastModifiedTime', 'billingEntityUUID',
                    'resourceCreateDate'}
     REQUIRED_ATTRIBS = {'associatedType', 'resourceType', 'extendedType',
                         'sortOrder', 'components', 'resourceName'}
-    OPTIONAL_ATTRIBS = {'isEditable', 'providers', 'resourceKey',
+    OPTIONAL_ATTRIBS = {'providers', 'isEditable', 'inUse', 'resourceKey',
                         'resourceMetadata', 'billingEntityName',
-                        'resourceState', 'inUse', 'resourceUUID',
-                        'lastModifiedTime', 'billingEntityUUID',
-                        'resourceCreateDate'}
-    TYPES = {'associatedType': enums.ResourceType, 'providers':
-             Dict(str, Dict(str, str)), 'isEditable': bool, 'inUse': bool,
+                        'resourceState', 'resourceUUID', 'lastModifiedTime',
+                        'billingEntityUUID', 'resourceCreateDate'}
+    TYPES = {'associatedType': enums.ResourceType, 'resourceMetadata':
+             ResourceMetadata, 'isEditable': bool, 'inUse': bool,
              'resourceType': enums.ResourceType, 'resourceKey':
-             List(ResourceKey), 'resourceMetadata': ResourceMetadata,
+             List(ResourceKey), 'providers': Dict(str, Dict(str, str)),
              'billingEntityName': str, 'resourceState': enums.ResourceState,
              'extendedType': str, 'sortOrder': int, 'components':
-             List(ProductComponentType), 'resourceName': str, 'resourceUUID':
+             List(ProductComponentType), 'resourceUUID': str, 'resourceName':
              str, 'lastModifiedTime': int, 'billingEntityUUID': str,
              'resourceCreateDate': datetime}
 
@@ -6146,20 +6153,22 @@ class ProductOffer(ComplexObject):
             available when the resources is loaded with children
         datetime resourceCreateDate (F):
             The creation date of the resource
+        bool inUse (F):
+            Indicates if purchases already exists for this product offer
         str productUUID (T):
             Holds the UUID of the linked product
         int sortOrder (T):
             The sort order value for the given resource
-        List(str) clusters (F):
-            The list of clusters with which Product Offer can be used
+        str resourceUUID (F):
+            The UUID of the resource (read-only)
         str billingEntityUUID (F):
             The UUID of the Billing Entity to which the resource belongs
         str productExtendedType (F):
             The accociated extended type of the linked product
         str productName (F):
             Holds the name of the product
-        str resourceUUID (F):
-            The UUID of the resource (read-only)
+        List(str) clusters (F):
+            The list of clusters with which Product Offer can be used
         int lastModifiedTime (F):
             The time, in milliseconds from epoch, when the resource was
             last modified.
@@ -6175,25 +6184,23 @@ class ProductOffer(ComplexObject):
         enums.BillingPeriod billingPeriod (T):
             The billing period associated with the product offer (i.e
             how often a billing line is generated)
-        bool inUse (F):
-            Indicates if purchases already exists for this product offer
     """
 
     ALL_ATTRIBS = {'linkedProviders', 'isEditable', 'providers',
                    'resourceMetadata', 'billingEntityName', 'resourceState',
                    'unitType', 'resourceName', 'productComponentTypes',
                    'resourceCreateDate', 'productUUID', 'sortOrder',
-                   'resourceUUID', 'billingEntityUUID', 'productExtendedType',
-                   'productName', 'clusters', 'lastModifiedTime',
+                   'clusters', 'billingEntityUUID', 'productExtendedType',
+                   'productName', 'resourceUUID', 'lastModifiedTime',
                    'productAssociatedType', 'resourceType', 'resourceKey',
                    'componentConfig', 'billingPeriod', 'inUse'}
     REQUIRED_ATTRIBS = {'productUUID', 'resourceType', 'componentConfig',
                         'billingPeriod', 'sortOrder', 'resourceName'}
-    OPTIONAL_ATTRIBS = {'productAssociatedType', 'linkedProviders', 'clusters',
+    OPTIONAL_ATTRIBS = {'productAssociatedType', 'linkedProviders',
                         'isEditable', 'providers', 'billingEntityUUID',
                         'resourceKey', 'resourceMetadata', 'billingEntityName',
-                        'resourceState', 'productName', 'unitType',
-                        'productExtendedType', 'inUse', 'resourceUUID',
+                        'resourceState', 'productName', 'resourceUUID',
+                        'unitType', 'productExtendedType', 'inUse', 'clusters',
                         'lastModifiedTime', 'productComponentTypes',
                         'resourceCreateDate'}
     TYPES = {'linkedProviders': List(str), 'isEditable': bool, 'providers':
@@ -6202,9 +6209,9 @@ class ProductOffer(ComplexObject):
              'unitType': enums.UnitType, 'resourceName': str,
              'productComponentTypes': Dict(str, ProductComponentType),
              'resourceCreateDate': datetime, 'productUUID': str, 'sortOrder':
-             int, 'clusters': List(str), 'billingEntityUUID': str,
-             'productExtendedType': str, 'productName': str, 'resourceUUID':
-             str, 'lastModifiedTime': int, 'productAssociatedType':
+             int, 'resourceUUID': str, 'billingEntityUUID': str,
+             'productExtendedType': str, 'productName': str, 'clusters':
+             List(str), 'lastModifiedTime': int, 'productAssociatedType':
              enums.ResourceType, 'resourceType': enums.ResourceType,
              'resourceKey': List(ResourceKey), 'componentConfig':
              List(ProductComponent), 'billingPeriod': enums.BillingPeriod,
@@ -6317,7 +6324,7 @@ class ImportVmSpec(ComplexObject):
     Name.
 
     Attributes (type name (required): description:
-        str externalVmXML (T):
+        List(ProductOffer) serverOffers (T):
                      No documentation is available for this field #####
         Server externalVm (T):
                      No documentation is available for this field #####
@@ -6325,18 +6332,18 @@ class ImportVmSpec(ComplexObject):
                      No documentation is available for this field #####
         List(ProductOffer) networkOffers (T):
                      No documentation is available for this field #####
-        List(ProductOffer) serverOffers (T):
+        str externalVmXML (T):
                      No documentation is available for this field #####
         List(Network) availableNetworks (T):
                      No documentation is available for this field #####
     """
 
-    ALL_ATTRIBS = {'serverOffers', 'externalVm', 'diskOffers', 'networkOffers',
-                   'externalVmXML', 'availableNetworks'}
-    REQUIRED_ATTRIBS = {'externalVmXML', 'externalVm', 'diskOffers',
-                        'networkOffers', 'serverOffers', 'availableNetworks'}
+    ALL_ATTRIBS = {'externalVmXML', 'externalVm', 'diskOffers',
+                   'networkOffers', 'serverOffers', 'availableNetworks'}
+    REQUIRED_ATTRIBS = {'serverOffers', 'externalVm', 'diskOffers',
+                        'networkOffers', 'externalVmXML', 'availableNetworks'}
     OPTIONAL_ATTRIBS = set()
-    TYPES = {'externalVmXML': str, 'externalVm': Server, 'diskOffers':
-             List(ProductOffer), 'networkOffers': List(ProductOffer),
-             'serverOffers': List(ProductOffer), 'availableNetworks':
+    TYPES = {'serverOffers': List(ProductOffer), 'externalVm': Server,
+             'diskOffers': List(ProductOffer), 'networkOffers':
+             List(ProductOffer), 'externalVmXML': str, 'availableNetworks':
              List(Network)}
