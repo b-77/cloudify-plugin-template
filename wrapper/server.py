@@ -38,7 +38,7 @@ PROP_RAM_AMOUNT = 'ram_amount'
 PROP_PUBLIC_KEYS = 'public_keys'
 PROP_SERVER_PO_NAME = 'server_type'
 PROP_CLUSTER = 'cluster_uuid'
-PROP_NET = 'network_uuid'
+PROP_NET = 'net_uuid'
 
 RPROP_UUID = 'uuid'
 RPROP_DISKS = 'disks'
