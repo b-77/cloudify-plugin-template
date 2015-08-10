@@ -17,12 +17,13 @@ class REST(object):
         """Initialise FCP API Interface."""
         self.client = clients.get_client(auth, logger=logger)
         self.logger = logger
+        self.logger.debug('REST API initialised with auth: %s', auth)
 
     def __getattr__(self, item):
         """Get relevant Endpoint object when accessed."""
         class Endpoint(object):
             def __call__(eself, *args, **kwargs):
-                self.logger.debug('API endpoint {} requested'.format(item))
+                self.logger.debug('REST API endpoint request: %s', item)
                 return self.query(item, *args, **kwargs)
 
         return Endpoint()
@@ -36,6 +37,8 @@ class REST(object):
         payload = endpoint.untype()
         if not len(payload):
             payload = None
+
+        self.logger.debug('REST API generated endpoint:\nTYPE: %s\nURL: %s\nDATA: %s', type, url, payload)
 
         if type is endpoints.Verbs.PUT:
             fn = self.client.put
@@ -51,6 +54,8 @@ class REST(object):
             raise exceptions.NonRecoverableError('unsupported API verb')
 
         rv = fn(url, payload)
+
+        self.logger.debug('REST API return value: %s', rv)
 
         if validate:
             return rv, endpoint.validate_return(rv)

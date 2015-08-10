@@ -62,17 +62,16 @@ def _rest_client_retry_and_auth(f):
         while retry_count:
             terminate = False
 
-            self.logger.debug('=' * 60)
-
+            self.logger.info('Client function: %s', f.__name__)
+            self.logger.info('Client URL: %s', url)
+            self.logger.info('Client data: %s', data)
             r = f(self, url, payload, self.auth, self.headers,
                   self.verify)
 
-            self.logger.debug('-' * 60)
-            self.logger.debug('URL: {}'.format(r.url))
+            self.logger.debug('Client final URL: {}'.format(r.url))
             if len(r.content) > 60:
                 self.logger.info('Content: {}'.format(r.content[:57] + '...'))
-                # self.logger.debug('Full content: {}'.format(r.content))
-                self.logger.info('Full content: {}'.format(r.content))
+                self.logger.debug('Full content: {}'.format(r.content))
             else:
                 self.logger.info('Content: {}'.format(r.content))
             self.logger.info('Status code: {}'.format(r.status_code))
@@ -80,26 +79,26 @@ def _rest_client_retry_and_auth(f):
             if r.status_code == rsc.accepted or r.status_code == rsc.ok:
                 self.logger.debug('=' * 60)
 
-                # TODO: convert everything to unicode
-                unicode = json.loads(r.content)
+                # TODO: convert everything to unicode?
+                content = json.loads(r.content)
 
-                def to_str(unicode):
+                def to_str(uni):
                     """Recursively turn unciode to str."""
-                    if isinstance(unicode, list):
-                        gen = enumerate(unicode)
-                        string = [None]*len(unicode)
-                    elif isinstance(unicode, dict):
-                        gen = unicode.items()
+                    if isinstance(uni, list):
+                        gen = enumerate(uni)
+                        string = [None]*len(uni)
+                    elif isinstance(uni, dict):
+                        gen = uni.items()
                         string = {}
-                    elif isinstance(unicode, basestring):
-                        return str(unicode)
+                    elif isinstance(uni, basestring):
+                        return str(uni)
                     else:
-                        return unicode
+                        return uni
                     for k, v in gen:
                         string[to_str(k)] = to_str(v)
                     return string
 
-                return to_str(unicode)
+                return to_str(content)
 
             if r.status_code == rsc.too_many_requests:
                 error = 'Server busy (too many requests); waiting and ' \
@@ -118,31 +117,30 @@ def _rest_client_retry_and_auth(f):
             elif r.status_code == rsc.service_unavailable:
                 error = 'Server responded with service unavailable; waiting ' \
                         'and retrying {} more time(s).'.format(retry_count)
+            else:
+                error = 'Other error; waiting and retrying {} more times(s).' \
+                    .format(retry_count)
 
             try:
                 error += ' (Message: {})'.format(
                     json.loads(r.content)['message'].strip())
-            except:
+            except KeyError:
                 pass
 
-            self.logger.error(error)
-
             if terminate:
-                self.logger.debug('=' * 60)
+                self.logger.error(error)
                 raise NonRecoverableError(error)
-            if self.internal_retry:
+            elif self.internal_retry:
+                self.logger.warn(error)
                 retry_count -= 1
                 sleep(self.retry_delay)
             else:
+                self.logger.warn(error)
                 raise RecoverableError(message=error,
                                        retry_after=self.retry_delay)
 
-        self.logger.error('Giving up on API request (url: {}, payload: {}).'
-                          .format(url, payload))
-        self.logger.debug('=' * 60)
-
-        REST_FAILURE_EXCEPTION('Giving up on API request (url: {}, '
-                               'payload: {}).'.format(url, payload))
+        self.logger.error('Giving up on client API request')
+        REST_FAILURE_EXCEPTION('Giving up on client API request')
 
     return wrapper
 
@@ -188,36 +186,24 @@ class RESTClient(APIClient):
     @_rest_client_retry_and_auth
     def post(self, url, data, auth, headers, verify):
         """Make POST request to FCO API."""
-        self.logger.info('METHOD: POST')
-        self.logger.info('URL: {}'.format(url))
-        self.logger.info('DATA: {}'.format(data))
         return requests.post(url, data, auth=auth, headers=headers,
                              verify=verify)
 
     @_rest_client_retry_and_auth
     def get(self, url, data, auth, headers, verify):
         """Make GET request to FCO API."""
-        self.logger.info('METHOD: GET')
-        self.logger.info('URL: {}'.format(url))
-        self.logger.info('DATA: {}'.format(data))
         return requests.get(url, params=data, auth=auth, headers=headers,
                             verify=verify)
 
     @_rest_client_retry_and_auth
     def put(self, url, data, auth, headers, verify):
         """Make PUT request to FCO API."""
-        self.logger.info('METHOD: PUT')
-        self.logger.info('URL: {}'.format(url))
-        self.logger.info('DATA: {}'.format(data))
         return requests.put(url, data, auth=auth, headers=headers,
                             verify=verify)
 
     @_rest_client_retry_and_auth
     def delete(self, url, data, auth, headers, verify):
         """Make DELETE request to FCO API."""
-        self.logger.info('METHOD: DELETE')
-        self.logger.info('URL: {}'.format(url))
-        self.logger.info('DATA: {}'.format(data))
         return requests.delete(url, params=data, auth=auth, headers=headers,
                                verify=verify)
 
