@@ -215,27 +215,29 @@ def create(fco_api, *args, **kwargs):
     public_key = get_resource(fco_api, key_uuid, 'SSHKEY').publicKey
     username = server.initialUser
     password = server.initialPassword
-    try:
-        s = pxssh.pxssh()
-        s.login(server_ip, username, password)
-        s.sendline('echo "{}" >> ~/.ssh/authorized_keys'.format(public_key))
-        s.prompt()
-        s.logout()
-    except pxssh.ExceptionPxssh as e:
-        logger.error('pexpect error: %s', str(e))
-    finally:
-        call(['sed', '-i', '/{}.*/d'.format('\\.'.join(server_ip.split('.')))])
+    # try:
+    #     s = pxssh.pxssh()
+    #     s.login(server_ip, username, password)
+    #     s.sendline('echo "{}" >> ~/.ssh/authorized_keys'.format(public_key))
+    #     s.prompt()
+    #     s.logout()
+    # except pxssh.ExceptionPxssh as e:
+    #     logger.error('pexpect error: %s', str(e))
+    # finally:
+    #     call(['sed', '-i', '/{}.*/d'.format('\\.'.join(server_ip.split('.')))])
 
-    rp_[RPROP_UUID] = server.resourceUUID
+    rp_[RPROP_UUID] = server_uuid
+    rp_[RPROP_IP] = server_ip
+    rp_[RPROP_USER] = username
+    rp_[RPROP_PASS] = password
+
+    server = get_resource(fco_api, server_uuid, 'SERVER')
     rp_[RPROP_DISKS] = [d.resourceUUID for d in server.disks]
     rp_[RPROP_NICS] = [n.resourceUUID for n in server.nics]
-    rp_[RPROP_IP] = server_ip
-    rp_[RPROP_USER] = server.initialUser
-    rp_[RPROP_PASS] = server.initialPassword
 
     ctx.logger.info('Server IP: ' + server_ip)
-    ctx.logger.info('Server User: ' + server.initialUser)
-    ctx.logger.info('Server Password: ' + server.initialPassword)
+    ctx.logger.info('Server User: ' + username)
+    ctx.logger.info('Server Password: ' + password)
 
     return server_uuid, server_ip, username, password
 
