@@ -30,31 +30,32 @@ class REST(object):
 
     def query(self, endpoint, parameters=None, data=None, validate=False,
               **kwargs):
+        """Perform an API query to the given endpoint."""
         endpoint = endpoint[0].capitalize() + endpoint[1:]
         endpoint = getattr(endpoints, endpoint)(parameters, data, **kwargs)
-        type, url = endpoint.endpoint
+        type_, url = endpoint.endpoint
 
         payload = endpoint.untype()
         if not len(payload):
             payload = None
 
-        self.logger.debug('REST API generated endpoint:\nTYPE: %s\nURL: %s\nDATA: %s', type, url, payload)
+        self.logger.debug('REST API generated endpoint:\nTYPE: %s\nURL: %s\n'
+                          'DATA: %s', type_, url, payload)
 
-        if type is endpoints.Verbs.PUT:
+        if type_ is endpoints.Verbs.PUT:
             fn = self.client.put
-        elif type is endpoints.Verbs.GET:
+        elif type_ is endpoints.Verbs.GET:
             fn = self.client.get
-        elif type is endpoints.Verbs.POST:
+        elif type_ is endpoints.Verbs.POST:
             fn = self.client.post
             if payload:
                 payload = json.JSONEncoder().encode(payload)
-        elif type is endpoints.Verbs.DELETE:
+        elif type_ is endpoints.Verbs.DELETE:
             fn = self.client.delete
         else:
             raise exceptions.NonRecoverableError('unsupported API verb')
 
         rv = fn(url, payload)
-
         self.logger.debug('REST API return value: %s', rv)
 
         if validate:

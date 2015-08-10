@@ -1,6 +1,6 @@
 # coding=UTF-8
 
-"""Some placeholder Exceptions."""
+"""Some placeholder Exceptions to match Cloudify exceptions."""
 
 
 class NonRecoverableError(Exception):
