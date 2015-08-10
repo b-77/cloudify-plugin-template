@@ -12,6 +12,8 @@ from fcoclient.api import REST as RESTApi
 import fcoclient.exceptions as fco_exceptions
 import resttypes.cobjects as cobjects
 
+import traceback
+
 
 def _find_instanceof_in_kwargs(cls, kw):
     """Find a single instance of a class in a dict.
@@ -114,6 +116,7 @@ def with_fco_api(f):
         except fco_exceptions.RecoverableError as e:
             raise RecoverableError(str(e), retry_after=e.retry_after)
         except Exception as e:
+            traceback.print_exc()
             raise NonRecoverableError(str(e))
 
     return wrapper
