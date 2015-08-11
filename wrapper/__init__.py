@@ -206,8 +206,10 @@ def stop_server(fco_api, server_uuid):
 
 def create_server(fco_api, server_name, server_po_uuid, image_uuid,
                   cluster_uuid, vdc_uuid, cpu_count, ram_amount,
-                  boot_disk_po_uuid, keys_uuid=None):
+                  boot_disk_po_uuid, keys_uuid=[]):
     disk_size = get_image(fco_api, image_uuid).size
+    if not isinstance(keys_uuid, list):
+        keys_uuid = [keys_uuid]
     disk = cobjects.Disk(storageCapabilities=None, clusterUUID=None,
                          resourceType='DISK', iso=False, sortOrder=None,
                          vdcUUID=vdc_uuid, resourceName=None, size=disk_size,
@@ -218,12 +220,7 @@ def create_server(fco_api, server_name, server_po_uuid, image_uuid,
                              vdcUUID=vdc_uuid, resourceName=server_name,
                              productOfferUUID=server_po_uuid,
                              imageUUID=image_uuid, cpu=cpu_count,
-                             ram=ram_amount)
-    if isinstance(keys_uuid, list):
-        return fco_api.createServer(skeletonServer=server, sshKeyUUIDList=keys_uuid)
-    elif keys_uuid is not None:
-        return fco_api.createServer(skeletonServer=server, sshKeyUUIDList=[keys_uuid])
-    else:
+                             ram=ram_amount, sshkeys=keys_uuid)
         return fco_api.createServer(skeletonServer=server)
 
 
