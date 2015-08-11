@@ -96,8 +96,7 @@ def create(fco_api, *args, **kwargs):
 
     # Set up VDC
     if not vdc_uuid:
-        vdc_uuid = create_vdc(fco_api, cluster_uuid, 'VDC ' + datetime.now()
-                              .strftime('%Y-%m-%d %H:%M:%S')).itemUUID
+        vdc_uuid = create_vdc(fco_api, cluster_uuid).itemUUID
     if not vdc_uuid:
         raise Exception('Could not get or create VDC!')
 
@@ -122,10 +121,10 @@ def create(fco_api, *args, **kwargs):
     ctx.logger.info('Boot disk PO UUID: ' + boot_disk_po_uuid)
 
     # Create server
+    server_name = ctx.node.name + '-' + ctx.node.id
     try:
         server_uuid = rp_[RPROP_UUID]
     except KeyError:
-        server_name = 'VM ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         key_obj = get_resource(fco_api, key_uuid, 'SSHKEY')
         keys = SSHKey.REQUIRED_ATTRIBS.copy()
         keys.add('resourceUUID')
@@ -135,10 +134,10 @@ def create(fco_api, *args, **kwargs):
                 submit_key[k] = getattr(key_obj, k)
             except AttributeError:
                 submit_key[k] = None
-        create_server_job = create_server(fco_api, server_name, server_po_uuid,
-                                          image_uuid, cluster_uuid, vdc_uuid,
-                                          cpu_count, ram_amount,
-                                          boot_disk_po_uuid, [submit_key])
+        create_server_job = create_server(fco_api, server_po_uuid, image_uuid,
+                                          cluster_uuid, vdc_uuid, cpu_count,
+                                          ram_amount, boot_disk_po_uuid,
+                                          [submit_key], server_name)
         server_uuid = create_server_job.itemUUID
         rp_[RPROP_UUID] = server_uuid
 
@@ -151,7 +150,8 @@ def create(fco_api, *args, **kwargs):
     # Add keys
     for single_key in public_keys:
         if single_key not in server_keys:
-            key_uuid = create_ssh_key(fco_api, single_key, '').itemUUID
+            key_uuid = create_ssh_key(fco_api, single_key, server_name) \
+                .itemUUID
             attach_ssh_key(fco_api, server_uuid, key_uuid)
 
     ctx.logger.info('Keys attached')
@@ -166,8 +166,8 @@ def create(fco_api, *args, **kwargs):
     if not net_uuid:
         net_uuid = get_network_uuid(fco_api, net_type, cluster_uuid)
     if not net_uuid:
-        net_uuid = create_network(fco_api, cluster_uuid, net_type, vdc_uuid)\
-            .itemUUID
+        net_uuid = create_network(fco_api, cluster_uuid, net_type, vdc_uuid,
+                                  server_name).itemUUID
     if not net_uuid:
         raise Exception('Failed to create network')
 
@@ -178,7 +178,7 @@ def create(fco_api, *args, **kwargs):
         nic_uuid = rp_[RPROP_NIC]
     except KeyError:
         nic_uuid = create_nic(fco_api, cluster_uuid, net_type, net_uuid,
-                              vdc_uuid, '0').itemUUID
+                              vdc_uuid, server_name).itemUUID
         if not wait_for_state(fco_api, nic_uuid, 'ACTIVE', 'NIC'):
             raise Exception('NIC failed to create in time!')
         rp_[RPROP_NIC] = nic_uuid

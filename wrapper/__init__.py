@@ -5,6 +5,7 @@
 from __future__ import print_function
 from resttypes import cobjects
 from time import sleep
+from datetime import datetime
 
 __author__ = 'alen'
 
@@ -119,8 +120,10 @@ def get_cluster_uuid(fco_api):
 # VDC stuff
 ###############################################################################
 
-def create_vdc(fco_api, cluster_uuid, vdc_name):
-    vdc = cobjects.VDC(resourceType='VDC', resourceName=vdc_name,
+def create_vdc(fco_api, cluster_uuid, name=None):
+    if name is None:
+        name = 'VDC ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    vdc = cobjects.VDC(resourceType='VDC', resourceName=name,
                        clusterUUID=cluster_uuid, sortOrder=None,
                        vdcUUID=None)
     return fco_api.createVDC(skeletonVDC=vdc)
@@ -141,11 +144,13 @@ def get_vdc_uuid(fco_api):
 # Network stuff
 ###############################################################################
 
-def create_network(fco_api, cluster_uuid, net_type, vdc_uuid):
+def create_network(fco_api, cluster_uuid, net_type, vdc_uuid, name=None):
+    if name is None:
+        name = 'NETWORK ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     net_data = cobjects.Network(clusterUUID=cluster_uuid,
                                 resourceType='NETWORK', vdcUUID=vdc_uuid,
                                 sortOrder=None, networkType=net_type,
-                                resourceName='xxx')
+                                resourceName=name)
     return fco_api.createNetwork(skeletonNetwork=net_data)
 
 
@@ -206,20 +211,25 @@ def stop_server(fco_api, server_uuid):
     return change_server_status(fco_api, server_uuid, 'STOPPED')
 
 
-def create_server(fco_api, server_name, server_po_uuid, image_uuid,
+def create_server(fco_api, server_po_uuid, image_uuid,
                   cluster_uuid, vdc_uuid, cpu_count, ram_amount,
-                  boot_disk_po_uuid, keys_uuid=[]):
+                  boot_disk_po_uuid, keys_uuid=[], name=None):
+    if name is None:
+        name = 'SERVER ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        disk_name = 'DISK ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        disk_name = name + ' Disk'
     disk_size = get_image(fco_api, image_uuid).size
     if not isinstance(keys_uuid, list):
         keys_uuid = [keys_uuid]
     disk = cobjects.Disk(storageCapabilities=None, clusterUUID=None,
                          resourceType='DISK', iso=False, sortOrder=None,
-                         vdcUUID=vdc_uuid, resourceName=None, size=disk_size,
-                         resourceUUID=boot_disk_po_uuid)
+                         vdcUUID=vdc_uuid, resourceName=disk_name,
+                         size=disk_size, resourceUUID=boot_disk_po_uuid)
     server = cobjects.Server(serverCapabilities=None, clusterUUID=cluster_uuid,
                              virtualizationType=None, resourceType='SERVER',
                              disks=[disk], vmId=None, sortOrder=None,
-                             vdcUUID=vdc_uuid, resourceName=server_name,
+                             vdcUUID=vdc_uuid, resourceName=name,
                              productOfferUUID=server_po_uuid,
                              imageUUID=image_uuid, cpu=cpu_count,
                              ram=ram_amount, sshkeys=keys_uuid)
@@ -230,7 +240,10 @@ def create_server(fco_api, server_name, server_po_uuid, image_uuid,
 # Disk stuff
 ###############################################################################
 
-def create_disk(fco_api, vdc_uuid, disk_po_uuid, disk_name, disk_size):
+def create_disk(fco_api, vdc_uuid, disk_po_uuid, disk_name, disk_size,
+                name=None):
+    if name is None:
+        name = 'DISK ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     sc = ['CLONE', 'CHILDREN_PERSIST_ON_DELETE', 'CHILDREN_PERSIST_ON_REVERT']
     disk = cobjects.Disk(storageCapabilities=sc, clusterUUID=None,
                          resourceType='DISK', iso=False, sortOrder=None,
@@ -252,13 +265,14 @@ def detach_disk(fco_api, server_uuid, disk_uuid):
 # NIC stuff
 ###############################################################################
 
-def create_nic(fco_api, cluster_uuid, net_type, net_uuid,  vdc_uuid,
-               nic_count):
+def create_nic(fco_api, cluster_uuid, net_type, net_uuid, vdc_uuid, name=None):
+    if name is None:
+        name = 'NIC ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     nic_data = cobjects.Nic(clusterUUID=cluster_uuid, networkUUID=net_uuid,
                             vdcUUID=vdc_uuid, resourceType='NIC',
                             serverUUID=None, sortOrder=None,
                             networkType=net_type,
-                            resourceName=str(net_type)+'-'+nic_count)
+                            resourceName=name)
     return fco_api.createNetworkInterface(skeletonNIC=nic_data)
 
 
@@ -285,10 +299,12 @@ def get_customer_keys(fco_api, customer_uuid):
     return fco_api.listResources(resourceType='SSHKEY', searchFilter=sf)
 
 
-def create_ssh_key(fco_api, public_key, key_name):
+def create_ssh_key(fco_api, public_key, name):
+    if name is None:
+        name = 'SSHKEY ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     key = cobjects.SSHKey(clusterUUID=None, resourceType='SSHKEY',
                           publicKey=public_key, public_key=False,
-                          sortOder=None, vdcUUID=None, resourceName=key_name)
+                          sortOder=None, vdcUUID=None, resourceName=name)
     return fco_api.createSSHKey(skeletonSSHKey=key)
 
 
