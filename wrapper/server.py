@@ -129,11 +129,16 @@ def create(fco_api, *args, **kwargs):
         key_obj = get_resource(fco_api, key_uuid, 'SSHKEY')
         keys = SSHKey.REQUIRED_ATTRIBS.copy()
         keys.add('resourceUUID')
-        keys_obj = [{k: getattr(key_obj, k) for k in keys}]
+        submit_key = {}
+        for k in keys:
+            try:
+                submit_key[k] = getattr(key_obj, k)
+            except AttributeError:
+                submit_key[k] = None
         create_server_job = create_server(fco_api, server_name, server_po_uuid,
                                           image_uuid, cluster_uuid, vdc_uuid,
                                           cpu_count, ram_amount,
-                                          boot_disk_po_uuid, keys_obj)
+                                          boot_disk_po_uuid, [submit_key])
         server_uuid = create_server_job.itemUUID
         rp_[RPROP_UUID] = server_uuid
 
