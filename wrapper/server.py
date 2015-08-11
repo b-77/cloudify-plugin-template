@@ -29,6 +29,7 @@ import errno
 from cloudify import ctx
 from cloudify.decorators import operation
 from wrapper.helpers import with_fco_api
+from resttypes.cobjects import SSHKey
 from pexpect import pxssh
 from subprocess import call
 
@@ -125,7 +126,10 @@ def create(fco_api, *args, **kwargs):
         server_uuid = rp_[RPROP_UUID]
     except KeyError:
         server_name = 'VM ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        keys_obj = [get_resource(fco_api, key_uuid, 'SSHKEY')]
+        key_obj = get_resource(fco_api, key_uuid, 'SSHKEY')
+        keys = SSHKey.REQUIRED_ATTRIBS.copy()
+        keys.add('resourceUUID')
+        keys_obj = [{k: getattr(key_obj, k) for k in keys}]
         create_server_job = create_server(fco_api, server_name, server_po_uuid,
                                           image_uuid, cluster_uuid, vdc_uuid,
                                           cpu_count, ram_amount,
