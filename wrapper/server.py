@@ -121,7 +121,7 @@ def create(fco_api, *args, **kwargs):
     ctx.logger.info('Boot disk PO UUID: ' + boot_disk_po_uuid)
 
     # Create server
-    server_name = ctx.node.name + '-' + ctx.node.id
+    server_name = ctx.node.name + '-' + ctx.instance.id
     try:
         server_uuid = rp_[RPROP_UUID]
     except KeyError:
