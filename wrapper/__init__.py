@@ -59,7 +59,8 @@ def wait_for_status(fco_api, res_uuid, status, res_type, time=5, step=24):
 def wait_for_job(fco_api, job_uuid, time=5, step=24):
     while step:
         job = get_resource(fco_api, job_uuid, 'JOB')
-        if job.status in ['IN_PROGRESS', 'WAITING', 'NOT_STARTED', 'SUSPENDED']:
+        if job.status in ['IN_PROGRESS', 'WAITING', 'NOT_STARTED',
+                          'SUSPENDED']:
             continue
         return job.status == 'SUCCESSFUL'
     return False
@@ -90,7 +91,8 @@ def get_resource_type(fco_api, res_type, limit=False, number=200, page=0):
 
 
 def delete_resource(fco_api, res_uuid, res_type, cascade=False):
-    return fco_api.deleteResource(resourceUUID=res_uuid, resourceType=res_type, cascade=cascade)
+    return fco_api.deleteResource(resourceUUID=res_uuid, resourceType=res_type,
+                                  cascade=cascade)
 
 
 def get_prod_offer(fco_api, prod_offer_name):
@@ -221,7 +223,7 @@ def create_server(fco_api, server_name, server_po_uuid, image_uuid,
                              productOfferUUID=server_po_uuid,
                              imageUUID=image_uuid, cpu=cpu_count,
                              ram=ram_amount, sshkeys=keys_uuid)
-        return fco_api.createServer(skeletonServer=server)
+    return fco_api.createServer(skeletonServer=server)
 
 
 ###############################################################################
