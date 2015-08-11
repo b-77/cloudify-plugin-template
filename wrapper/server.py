@@ -151,8 +151,8 @@ def create(fco_api, *args, **kwargs):
     # Add keys
     for single_key in public_keys:
         if single_key not in server_keys:
-            key_uuid = create_ssh_key(fco_api, single_key, server_name) \
-                .itemUUID
+            key_uuid = create_ssh_key(fco_api, single_key, server_name +
+                                      ' Key').itemUUID
             attach_ssh_key(fco_api, server_uuid, key_uuid)
 
     ctx.logger.info('Keys attached')
@@ -179,7 +179,7 @@ def create(fco_api, *args, **kwargs):
         nic_uuid = rp_[RPROP_NIC]
     except KeyError:
         nic_uuid = create_nic(fco_api, cluster_uuid, net_type, net_uuid,
-                              vdc_uuid, server_name).itemUUID
+                              vdc_uuid, server_name + ' NIC').itemUUID
         if not wait_for_state(fco_api, nic_uuid, 'ACTIVE', 'NIC'):
             raise Exception('NIC failed to create in time!')
         rp_[RPROP_NIC] = nic_uuid
