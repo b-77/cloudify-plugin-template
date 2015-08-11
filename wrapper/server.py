@@ -125,10 +125,11 @@ def create(fco_api, *args, **kwargs):
         server_uuid = rp_[RPROP_UUID]
     except KeyError:
         server_name = 'VM ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        key_obj =get_resource(fco_api, key_uuid, 'SSHKEY')
         create_server_job = create_server(fco_api, server_name, server_po_uuid,
                                           image_uuid, cluster_uuid, vdc_uuid,
                                           cpu_count, ram_amount,
-                                          boot_disk_po_uuid, [key_uuid])
+                                          boot_disk_po_uuid, [key_obj])
         server_uuid = create_server_job.itemUUID
         rp_[RPROP_UUID] = server_uuid
 
