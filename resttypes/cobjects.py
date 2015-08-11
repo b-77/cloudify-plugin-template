@@ -55,6 +55,24 @@ class ComplexObject(Typed):
         """Return string representation of Complext Object."""
         return '({}){}'.format(self.__class__.__name__, str(self._data))
 
+    def keys(self):
+        return self._data.keys()
+
+    def items(self):
+        return self._data.items()
+
+    def iteritems(self):
+        return self._data.iteritems()
+
+    def iterkeys(self):
+        return self._data.iterkeys()
+
+    def itervalues(self):
+        return self._data.itervalues()
+
+    def values(self):
+        return self._data.values()
+
     # TODO: catch exceptions upstairs
     @classmethod
     def is_acceptable(cls, inst):
