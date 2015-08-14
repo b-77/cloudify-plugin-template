@@ -30,8 +30,6 @@ from cloudify import ctx
 from cloudify.decorators import operation
 from wrapper.helpers import with_fco_api
 from resttypes.cobjects import SSHKey
-from pexpect import pxssh
-from subprocess import call
 
 
 PROP_IMAGE = 'image_uuid'
