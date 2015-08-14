@@ -19,6 +19,10 @@ node_types:
         default: 2048
       server_type:
         default: '2 GB / 2 CPU'
+      install_agent:
+        default: true
+      cloudify_agent:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
