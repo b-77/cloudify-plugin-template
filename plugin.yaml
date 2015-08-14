@@ -23,6 +23,10 @@ node_types:
         default: true
       cloudify_agent:
         default: {}
+      # TODO: remove once types get fixed
+      os:
+        default:
+          type: 'linux'
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
