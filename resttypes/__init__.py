@@ -12,25 +12,40 @@ __author__ = 'alen'
 
 
 def to_str(uni_):
-    """Recursively turn unciode to str."""
+    """
+    Recursively turn an object with unicode into an object with strings.
+
+    :param uni_: object with unicode elements
+    :return: object with string elements
+    """
     if isinstance(uni_, list):
-        gen = enumerate(uni_)
         str_ = [None]*len(uni_)
+        for k, v in enumerate(uni_):
+            str_[k] = to_str(v)
     elif isinstance(uni_, dict):
-        gen = uni_.items()
         str_ = {}
+        for k, v in uni_.items():
+            str_[to_str(k)] = to_str(v)
     elif isinstance(uni_, basestring):
-        return str(uni_)
+        str_ = uni_.encode('ascii','replace')
     else:
-        return uni_
-    for k, v in gen:
-        str_[to_str(k)] = to_str(v)
+        str_ = uni_
     return str_
 
 
 def rat_check(given_dict, all_, required, types, noneable,
               fail_additional=True):
-    """Check for required stuff, additional stuff and types of stuff."""
+    """
+    Check for required, additional and the type of given data.
+
+    :param given_dict: the data given
+    :param all_: all the possible data
+    :param required: all the required data
+    :param types:  all the data types
+    :param noneable: can a value be None
+    :param fail_additional: fail the check if additional data is given
+    :return: True or False depending on whether the check passed
+    """
     try:
         given = set(given_dict)
     except TypeError:
@@ -63,16 +78,21 @@ def rat_check(given_dict, all_, required, types, noneable,
 
 
 def is_acceptable(inst, type_, noneable):
-    """Check whether given instance is suitable for a cobject of type type_."""
+    """
+    Check whether given instance is suitable for a cobjet of type type_.
+
+    :param inst: instance to be checked
+    :param type_: type to check against
+    :param noneable: can data be None
+    :return: True or False depending on whether the check passed
+    """
     if inst is None and noneable:
         pass
     elif issubclass(type_, Typed):
-        if not isinstance(inst, type_) and \
-                not type_.is_acceptable(inst):
+        if not isinstance(inst, type_) and not type_.is_acceptable(inst):
             return False
     elif issubclass(type_, Enum):
-        if not isinstance(inst, type_) and \
-                not hasattr(type_, inst):
+        if not isinstance(inst, type_) and not hasattr(type_, inst):
             return False
     elif issubclass(type_, datetime):
         try:
@@ -81,12 +101,19 @@ def is_acceptable(inst, type_, noneable):
         except ValueError:
             return False
     elif not isinstance(inst, type_):
-        # ctx.logger.info('{} {} {}'.format(inst, type(inst), type_))
         return False
     return True
 
 
 def construct_data(inst, type_, noneable):
+    """
+    Construct data for a cobject of type type_.
+
+    :param inst: data source
+    :param type_: type to construct
+    :param noneable: can data be None
+    :return: constructed data
+    """
     """Construct data for a cobject of type type_."""
     if inst is None and noneable:
         return None

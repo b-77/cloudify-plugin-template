@@ -39,16 +39,29 @@ KW_PATTERN = 'pattern'
 
 
 def _rest_client_retry_and_auth(f):
-    """Authenticate, log and retry requests."""
+    """
+    Inject authentication and retry on REST failure.
+
+    :param f: function to wrap
+    :return: wrapper around function
+    """
     @wraps(f)
     def wrapper(self, endpoint, data=None, **kwargs):
+        """
+        Make an API call to a given endpoint.
+
+        :param endpoint: URL of the endpoint
+        :param data: data to include with the request
+        :param kwargs: alternative method of including data
+        :return: content of a successful response
+        """
         # TODO: remove legacy block
         try:
             endpoint = endpoint.format(**kwargs.get('pattern', {}))
         except IndexError:
             NonRecoverableError('Unable to format endpoint, pattern: {}, '
-                                'data: {}.'
-                                .format(endpoint, kwargs.get(KW_PATTERN)))
+                                'data: {}.' .format(endpoint,
+                                                    kwargs.get(KW_PATTERN)))
 
         url = '{service_url}/rest/user/{api_version}/{endpoint}'.format(
             service_url=self.service_url, api_version=REST_API_VERSION,
@@ -166,7 +179,12 @@ class APIClient(object):
 
     @classmethod
     def can_handle(cls, auth):
-        """Determine if a class is suitable to handle authentication type."""
+        """
+        Determine if a class is suitable to handle authentication type.
+
+        :param auth: dictionary containing auth details
+        :return: true if it can, false if it cannot
+        """
         return all([auth.get(k) is not None for k in cls.REQUIRED_AUTH])
 
 

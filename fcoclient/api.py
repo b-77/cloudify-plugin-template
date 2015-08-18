@@ -14,28 +14,47 @@ class REST(object):
     """FCO REST API Interface."""
 
     def __init__(self, auth, logger):
-        """Initialise FCP API Interface."""
+        """
+        Initialise FCP API Interface.
+
+        :param auth: dictionary containing auth details
+        :param logger: reference to a logger
+        :return:
+        """
         self.client = clients.get_client(auth, logger=logger)
         self.logger = logger
         self.logger.debug('REST API initialised with auth: %s', auth)
 
     def __getattr__(self, item):
-        """Get relevant Endpoint object when accessed."""
+        """
+        Get relevant Endpoint object when accessed.
+
+        :item: name of the endpoint
+        :return: function representing the Endpoint
+        """
+        self.logger.debug('REST API endpoint request: %s', item)
         def wrapper(*args, **kwargs):
-            self.logger.debug('REST API endpoint request: %s', item)
             return self.query(item, *args, **kwargs)
         return wrapper
 
     def query(self, endpoint, parameters=None, data=None, validate=False,
               **kwargs):
-        """Perform an API query to the given endpoint."""
+        """
+        Perform an API query to the given endpoint.
+
+        :param endpoint: name of the endpoint
+        :param parameters: parameters for the endpoint
+        :param data: data for the endpoint
+        :param validate: validate return data?
+        :param kwargs: alternative method for supplying parameters or data
+        :return: validated, data if validate true, otherwise only data
+        """
         endpoint = endpoint[0].capitalize() + endpoint[1:]
         endpoint = getattr(endpoints, endpoint)(parameters, data, **kwargs)
         type_, url = endpoint.endpoint
-
-        self.logger.info('%s', endpoint)
         payload = endpoint.untype()
-        self.logger.info('%s', payload)
+
+        self.logger.debug('%s', payload)
 
         if not len(payload):
             payload = None
@@ -49,6 +68,7 @@ class REST(object):
             fn = self.client.get
         elif type_ is endpoints.Verbs.POST:
             fn = self.client.post
+            # POST payload needs to be JSON-encoded
             if payload:
                 payload = json.JSONEncoder().encode(payload)
         elif type_ is endpoints.Verbs.DELETE:

@@ -18,11 +18,21 @@ class ComplexObject(Typed):
 
     """Generic class for FCO REST API Complex Objects."""
 
-    def __init__(self, data=None, *args,  **kwargs):
+    def __init__(self, data=None, **kwargs):
+        """
+        Initialise FCO REST API Complex Object.
+
+        Data can be passed as a complete dict or as (named) arguments. Named
+        arguments can be suffixed with underscores to prevent conflicts with
+        any other keywords.
+
+        :param data: data as a complete dict
+        :param kwargs: if data is a dict it is updated with kwargs
+        :return:
+        """
         """Initialise FCO REST API Complex Object."""
         super(ComplexObject, self).__init__(self)
 
-        # We can append underscores to avoid keyword conflicts
         kwargs = {k.rstrip('_'): to_str(v) for k, v in kwargs.items()}
 
         if data is None:
@@ -32,12 +42,9 @@ class ComplexObject(Typed):
 
         if hasattr(data, 'update'):
             data.update(kwargs)
-        elif hasattr(data, 'extend'):
-            data.extend(args)
 
         # TODO: creating the data structure should make it acceptable
         if not self.is_acceptable(data):
-            # ctx.logger.info(data)
             raise Exception('Invalid data to create class {}'
                             .format(type(self).__name__))
 
@@ -52,7 +59,6 @@ class ComplexObject(Typed):
             return self._data.get(attr)
 
     def __str__(self):
-        """Return string representation of Complext Object."""
         return '({}){}'.format(self.__class__.__name__, str(self._data))
 
     def keys(self):
@@ -81,15 +87,14 @@ class ComplexObject(Typed):
         opt = cls.OPTIONAL_ATTRIBS.copy()
         try:
             for k, v in inst.items():
-                # ctx.logger.info(' -> {}: {}, {}'.format(k, v, cls.TYPES[k]))
                 if k in req:
                     req.remove(k)
                 else:
                     opt.remove(k)
                 if not c_is_acceptable(v, cls.TYPES[k], cls._noneable):
                     return False
-        except:
-            raise
+        except KeyError:
+            return False
         return not req or cls._noneable
 
     @classmethod
